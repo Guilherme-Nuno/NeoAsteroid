@@ -80,4 +80,15 @@ public class HostServer {
     allPlayersLoadedMessage.setMessage("allPlayersLoaded", "");
     game.server.sendToAllTCP(allPlayersLoadedMessage);
   }
+
+  public void updateAllPlayersPosition() {
+    GameScreen gameScreen = (GameScreen) game.getScreen();
+
+    Message<SpaceShipDTO> updateShipsMessage = new Message<>();
+
+    for (SpaceShip spaceShip : gameScreen.playersSpaceShips) {
+      updateShipsMessage.setMessage("updateShips", new SpaceShipDTO(spaceShip));
+      game.server.sendToAllTCP(updateShipsMessage);
+    }
+  }
 }

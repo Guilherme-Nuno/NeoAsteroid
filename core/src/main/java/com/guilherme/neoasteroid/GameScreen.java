@@ -1,19 +1,18 @@
 package com.guilherme.neoasteroid;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
+import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
@@ -21,14 +20,16 @@ import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.esotericsoftware.minlog.Log;
 
 public class GameScreen implements Screen {
-  private Main game;
+  private final Main game;
 
-  private HostServer hostServer;
+  private final HostServer hostServer;
 
   public World world;
 
+  private float updateTimer = 0.0f;
+
   public OrthographicCamera camera;
-  private ExtendViewport viewport;
+  private final ExtendViewport viewport;
 
   private float timeToAsteroid = 0.0f;
   // private Texture backgroundTexture;
@@ -37,20 +38,21 @@ public class GameScreen implements Screen {
   public Texture tracerBulletTexture;
 
   private int satelliteID = 0;
-  public HashMap<Integer, Satellite> satellites;
+  public Map<Integer, Satellite> satellites;
 
-  private Array<Planet> planets;
+  private final Array<Planet> planets;
   private int earthHP;
 
   public SpaceShip playerShip;
-  private Array<Bullet> bullets;
+  private final Array<Bullet> bullets;
   private int bulletCount = 0;
   private float rateOfFireTimer = 0.0f;
   public List<SpaceShip> playersSpaceShips;
 
   public boolean allPlayersLoadingComplete = false;
 
-  private List<String> playersLoadingCompleteTempList;
+  private final List<String> playersLoadingCompleteTempList;
+  private InputProcessor inputHandler;
 
   public GameScreen(Main game) {
     this.game = game;
@@ -83,7 +85,7 @@ public class GameScreen implements Screen {
     // moonImage);
     // planets.add(moonPlanet);
 
-    satellites = new HashMap<>();
+    satellites = new ConcurrentHashMap<>();
     playersLoadingCompleteTempList = new CopyOnWriteArrayList<>();
     playersSpaceShips = new CopyOnWriteArrayList<>();
 
@@ -99,7 +101,6 @@ public class GameScreen implements Screen {
 
   @Override
   public void show() {
-    // TODO Auto-generated method stub
   }
 
   @Override
@@ -118,58 +119,19 @@ public class GameScreen implements Screen {
 
       renderLoadingScreen();
 
+      // Setting up the game by the host
       if (game.player.isHost()) {
         if (!game.allPlayersInGameScreen()) {
           return;
         }
 
-        if (satellites.isEmpty()) {
-          for (int i = 0; i < 1000; i++) {
-            Satellite newSatellite = new Satellite(world, satelliteID, 500, 530, (float) Math.random() * 1.4f + 0.8f,
-                satelliteTexture);
-            satelliteID++;
-            satellites.put(newSatellite.getId(), newSatellite);
-
-            Planet planet = findPlanetHighestGravForce(newSatellite.body);
-
-            // Random direction for orbit. Add random num to rotation
-            // int randomNum = Math.random() < 0.5 ? -1 : 1;
-            setInicialOrbitVelocity(newSatellite.body, planet, 1);
-
-            hostServer.sendNewAsteroid(newSatellite);
-          }
-          Log.info("Sent asteroids");
-
-          game.player.setAsteroidsLoaded(true);
-        }
+        initialAsteroidCreation();
 
         if (!game.allPlayersLoadedAsteroids()) {
           return;
         }
 
-        if (playersSpaceShips.isEmpty()) {
-          for (Player player : game.players) {
-            playersSpaceShips.add(new SpaceShip(world, player));
-          }
-
-          for (SpaceShip spaceShip : playersSpaceShips) {
-            setInicialOrbitVelocity(spaceShip.body, planets.get(0), 1);
-
-            hostServer.sendNewSpaceShip(spaceShip);
-          }
-
-          // Selects playerShip
-          for (SpaceShip spaceShip : playersSpaceShips) {
-            if (spaceShip.getPlayer().getName().equals(game.player.getName())) {
-              playerShip = spaceShip;
-            }
-          }
-
-          camera.position.set(playerShip.getPosition(), 0);
-          camera.update();
-
-          game.player.setSpaceShipsLoaded(true);
-        }
+        initialSpaceShipsCreation();
 
         if (!game.allPlayersLoadedSpaceShips()) {
           return;
@@ -178,19 +140,49 @@ public class GameScreen implements Screen {
           hostServer.sendAllPlayersLoaded();
         }
       }
-
       return;
     }
 
-    // Create new asteroids every 5 seconds
-    timeToAsteroid += delta;
+    if (inputHandler == null) {
+      if (game.player.isHost()) {
+        inputHandler = new InputHandlerHost(game, playerShip);
+        Gdx.input.setInputProcessor(inputHandler);
+        Log.info("Created Host InputHandler");
+      } else {
+        inputHandler = new InputHandlerClient(game, playerShip);
+        Gdx.input.setInputProcessor(inputHandler);
+        Log.info("Created Client InputHandler");
+      }
+    }
+
+    // TODO Add logic to handle ship movements.
+    spaceShipsMovements();
+
+    // Loop for timed events
+    if (game.player.isHost()) {
+
+      // Create new asteroids every 5 seconds
+      timeToAsteroid += delta;
+
+      if (timeToAsteroid > 5f) {
+        createAsteroidThreat(world, satelliteTexture, planets.get(0), satellites);
+        timeToAsteroid = 0.0f;
+      }
+
+      // Update players and asteroids position
+      updateTimer += delta;
+
+      if (updateTimer > 0.1) {
+        hostServer.updateAllPlayersPosition();
+
+        for (Satellite asteroid : satellites.values()) {
+          hostServer.sendUpdateAsteroid(asteroid);
+        }
+        updateTimer = 0.0f;
+      }
+    }
 
     rateOfFireTimer += delta;
-
-    if (timeToAsteroid > 30f) {
-      createAsteroidThreat(world, satelliteTexture, planets.get(0), satellites);
-      timeToAsteroid = 0.0f;
-    }
 
     // Log for Earth Health
     int tempHP = planets.get(0).getHealthPoints();
@@ -202,8 +194,7 @@ public class GameScreen implements Screen {
 
     Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-    applyInput();
-
+    // Flag asteroids to remove
     List<Integer> toRemove = new ArrayList<>();
     for (Map.Entry<Integer, Satellite> entry : satellites.entrySet()) {
       if (!entry.getValue().isAlive()) {
@@ -345,57 +336,10 @@ public class GameScreen implements Screen {
     // setInitialVelocityMagnitude);
   }
 
-  private void applyInput() {
 
-    if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
-      playerShip.acelerate();
-    }
-
-    if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
-      playerShip.rotateRight();
-    } else if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
-      playerShip.rotateLeft();
-    }
-
-    if (Gdx.input.isKeyPressed(Input.Keys.E)) {
-      camera.zoom += 0.05f;
-    } else if (Gdx.input.isKeyPressed(Input.Keys.Q)) {
-      camera.zoom -= 0.05f;
-    }
-
-    if (Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
-      float mouseX = Gdx.input.getX();
-      float mouseY = Gdx.input.getY();
-
-      Vector3 worldCoordinates = new Vector3(mouseX, mouseY, 0);
-
-      camera.unproject(worldCoordinates);
-
-      Vector2 mouseCoordinates = new Vector2(worldCoordinates.x, worldCoordinates.y);
-      Vector2 direction = new Vector2(mouseCoordinates).sub(playerShip.getPosition()).nor();
-
-      if (rateOfFireTimer > 0.025f) {
-        if (bulletCount >= 5) {
-          Bullet bullet = new Bullet(world, direction, playerShip.getPosition(), tracerBulletTexture, 30.0f * 2, 10,
-              0.5f * 2,
-              0.075f * 2);
-          bullets.add(bullet);
-          rateOfFireTimer = 0;
-          bulletCount = 0;
-        } else {
-          Bullet bullet = new Bullet(world, direction, playerShip.getPosition(), bulletTexture, 30.0f * 2, 10,
-              0.25f * 2,
-              0.075f * 2);
-          bullets.add(bullet);
-          rateOfFireTimer = 0;
-          bulletCount++;
-        }
-      }
-    }
-  }
 
   private void createAsteroidThreat(World world, Texture satelliteTexture, Planet planet,
-      HashMap<Integer, Satellite> satelliteList) {
+      Map<Integer, Satellite> satelliteList) {
     Satellite asteroid = new Satellite(world, satelliteID, 1000, 1500, 4, satelliteTexture);
     satelliteID++;
     Vector2 direction = planet.getPosition().cpy().sub(asteroid.body.getPosition());
@@ -404,6 +348,7 @@ public class GameScreen implements Screen {
     asteroid.body.setLinearVelocity(force);
 
     satelliteList.put(asteroid.getId(), asteroid);
+    hostServer.sendNewAsteroid(asteroid);
   }
 
   private void simulateAtmosphericDrag(Satellite satellite) {
@@ -471,5 +416,76 @@ public class GameScreen implements Screen {
 
   public void setPlayerLoadingComplete(Player player) {
     playersLoadingCompleteTempList.add(player.getName());
+  }
+
+  /**
+   * Initialize asteroid creation on game start
+   */
+  private void initialAsteroidCreation() {
+    if (satellites.isEmpty()) {
+      for (int i = 0; i < 1000; i++) {
+        Satellite newSatellite = new Satellite(world, satelliteID, 500, 530, (float) Math.random() * 1.4f + 0.8f,
+          satelliteTexture);
+        satelliteID++;
+        satellites.put(newSatellite.getId(), newSatellite);
+
+        Planet planet = findPlanetHighestGravForce(newSatellite.body);
+
+        // Random direction for orbit. Add random num to rotation
+        // int randomNum = Math.random() < 0.5 ? -1 : 1;
+        setInicialOrbitVelocity(newSatellite.body, planet, 1);
+
+        hostServer.sendNewAsteroid(newSatellite);
+      }
+      Log.info("Sent asteroids");
+
+      game.player.setAsteroidsLoaded(true);
+    }
+  }
+
+  /**
+   * Creates player ships and set initial orbits around origin planet.
+   * Also assigns player ship.
+   */
+  private void initialSpaceShipsCreation() {
+    if (playersSpaceShips.isEmpty()) {
+      for (Player player : game.players) {
+        playersSpaceShips.add(new SpaceShip(world, player));
+      }
+
+      for (SpaceShip spaceShip : playersSpaceShips) {
+        setInicialOrbitVelocity(spaceShip.body, planets.get(0), 1);
+
+        hostServer.sendNewSpaceShip(spaceShip);
+      }
+
+      // Selects playerShip
+      for (SpaceShip spaceShip : playersSpaceShips) {
+        if (spaceShip.getPlayer().getName().equals(game.player.getName())) {
+          playerShip = spaceShip;
+        }
+      }
+
+      camera.position.set(playerShip.getPosition(), 0);
+      camera.update();
+
+      game.player.setSpaceShipsLoaded(true);
+    }
+  }
+
+  private void spaceShipsMovements() {
+    for (SpaceShip spaceShip : playersSpaceShips) {
+      if (spaceShip.isAccelerating()) {
+        spaceShip.accelerate();
+      }
+
+      if (spaceShip.isTurningLeft()) {
+        spaceShip.rotateLeft();
+      }
+
+      if (spaceShip.isTurningRight()) {
+        spaceShip.rotateRight();
+      }
+    }
   }
 }

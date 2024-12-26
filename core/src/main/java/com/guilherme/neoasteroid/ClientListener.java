@@ -25,13 +25,15 @@ public class ClientListener extends Listener {
 
   @Override
   public void received(Connection connection, Object object) {
+    GameScreen gameScreen;
+    SpaceShipDTO spaceShipDTO;
+
     if (object instanceof Message<?>) {
 
       Message<?> message = (Message<?>) object;
 
       switch (message.getType()) {
         case "chatMessage":
-          Log.info("Recebi");
           ChatMessage chatMessage = (ChatMessage) message.getPayload();
 
           game.chat.add(chatMessage.toStringChatMessage());
@@ -61,7 +63,7 @@ public class ClientListener extends Listener {
           @SuppressWarnings("unchecked")
           ArrayList<SatelliteDTO> satelliteList = (ArrayList<SatelliteDTO>) message.getPayload();
 
-          GameScreen gameScreen = (GameScreen) game.getScreen();
+          gameScreen = (GameScreen) game.getScreen();
 
           for (SatelliteDTO satelliteDTO : satelliteList) {
             int id = satelliteDTO.getId();
@@ -77,48 +79,49 @@ public class ClientListener extends Listener {
           break;
 
         case "newAsteroid":
-          GameScreen gameScreen2 = (GameScreen) game.getScreen();
-          Satellite satellite = new Satellite(gameScreen2.world, (SatelliteDTO) message.getPayload(),
-              gameScreen2.satelliteTexture);
+          gameScreen = (GameScreen) game.getScreen();
+          Satellite satellite = new Satellite(gameScreen.world, (SatelliteDTO) message.getPayload(),
+              gameScreen.satelliteTexture);
 
-          gameScreen2.satellites.put(satellite.getId(), satellite);
+          gameScreen.satellites.put(satellite.getId(), satellite);
 
           // TODO Checking for total number of asteroids. Need to change to get number of
-          // asteroids from outside.
-          if (gameScreen2.satellites.size() == 1000) {
+          // asteroids from outside. Will create problems when adding or deleting
+          // asteroids
+          if (gameScreen.satellites.size() == 1000 && !game.player.areAsteroidsLoaded()) {
             Message<Player> loadCompleteMessage = new Message<>();
             loadCompleteMessage.setMessage("asteroidsLoaded", game.player);
 
             game.client.sendTCP(loadCompleteMessage);
+            game.player.setAsteroidsLoaded(true);
 
             Log.info("Load Complete!");
           }
           break;
 
         case "allPlayersLoaded":
-          GameScreen gameScreen3 = (GameScreen) game.getScreen();
-          gameScreen3.allPlayersLoadingComplete = true;
+          gameScreen = (GameScreen) game.getScreen();
+          gameScreen.allPlayersLoadingComplete = true;
           break;
 
         case "newSpaceShip":
-          Log.info("Received SpaceShip from server!");
-          SpaceShipDTO spaceShipDTO = (SpaceShipDTO) message.getPayload();
+          spaceShipDTO = (SpaceShipDTO) message.getPayload();
 
-          GameScreen gameScreen4 = (GameScreen) game.getScreen();
+          gameScreen = (GameScreen) game.getScreen();
 
           Gdx.app.postRunnable(() -> {
-            gameScreen4.playersSpaceShips.add(new SpaceShip(gameScreen4.world, spaceShipDTO));
+            gameScreen.playersSpaceShips.add(new SpaceShip(gameScreen.world, spaceShipDTO));
 
-            if (gameScreen4.playersSpaceShips.size() == game.players.size()) {
+            if (gameScreen.playersSpaceShips.size() == game.players.size()) {
 
-              for (SpaceShip spaceShip : gameScreen4.playersSpaceShips) {
+              for (SpaceShip spaceShip : gameScreen.playersSpaceShips) {
                 if (spaceShip.getPlayer().getName().equals(game.player.getName())) {
-                  gameScreen4.playerShip = spaceShip;
+                  gameScreen.playerShip = spaceShip;
                 }
               }
 
-              gameScreen4.camera.position.set(gameScreen4.playerShip.getPosition(), 0);
-              gameScreen4.camera.update();
+              gameScreen.camera.position.set(gameScreen.playerShip.getPosition(), 0);
+              gameScreen.camera.update();
 
               game.player.setSpaceShipsLoaded(true);
               Message<Player> spaceShipsLoadedMessage = new Message<>();
@@ -128,6 +131,20 @@ public class ClientListener extends Listener {
             }
           });
 
+          break;
+
+        case "updateShips":
+          spaceShipDTO = (SpaceShipDTO) message.getPayload();
+          gameScreen = (GameScreen) game.getScreen();
+
+          Gdx.app.postRunnable(() -> {
+            for (SpaceShip spaceShip : gameScreen.playersSpaceShips) {
+              if (spaceShip.getPlayer().getName().equals(spaceShipDTO.getPlayer().getName())) {
+                spaceShip.setBodyPosition(spaceShipDTO.getPosition(), spaceShipDTO.getAngle(), spaceShipDTO.getLinearVelocity());
+                Log.info("Ship Position updated: " + spaceShipDTO.getPosition() + " and " + spaceShip.getPosition());
+              }
+            }
+          });
           break;
 
         default:

@@ -15,26 +15,26 @@ import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 
 public class SpaceShip {
-  private Player player;
+  private final Player player;
   private Vector2 position;
-  private float angularForce = 2500.0f;
-  private float aceleration;
-  private Texture spaceShipImg = new Texture("space_ship_medium.png");
+  private final float angularForce = 2500.0f;
+  private final float acceleration;
+  private final Texture spaceShipImg = new Texture("space_ship_medium.png");
   public Body body;
-  private Sprite sprite;
+  private final Sprite sprite;
   // private float spaceShipRadius = 1.0f;
-  private float spaceShipWidth = 2.0f * 2;
-  private float spaceShipHeight = 2.6f * 2;
-
-  public SpaceShip() {
-
-  }
+  private final float spaceShipWidth = 2.0f * 2;
+  private final float spaceShipHeight = 2.6f * 2;
+  private boolean isAccelerating = false;
+  private boolean isTurningRight = false;
+  private boolean isTurningLeft = false;
+  private boolean isFiring = false;
 
   public SpaceShip(World world, SpaceShipDTO spaceShipDTO) {
     this.player = spaceShipDTO.getPlayer();
     this.position = spaceShipDTO.getPosition();
 
-    aceleration = 33.3f;
+    acceleration = 33.3f;
 
     sprite = new Sprite(spaceShipImg);
     sprite.setSize(spaceShipWidth, spaceShipHeight);
@@ -69,7 +69,7 @@ public class SpaceShip {
     this.player = player;
 
     position = new Vector2(setCoordinates(80, 120));
-    aceleration = 33.3f;
+    acceleration = 33.3f;
 
     sprite = new Sprite(spaceShipImg);
     sprite.setSize(spaceShipWidth, spaceShipHeight);
@@ -109,10 +109,10 @@ public class SpaceShip {
   public void dispose() {
   }
 
-  public void acelerate() {
+  public void accelerate() {
     float angle = body.getAngle();
     Vector2 direction = new Vector2((float) MathUtils.sin(angle), (float) MathUtils.cos(angle));
-    body.applyForceToCenter(direction.scl(aceleration), true);
+    body.applyForceToCenter(direction.scl(acceleration), true);
   }
 
   public void rotateRight() {
@@ -127,8 +127,45 @@ public class SpaceShip {
     return body.getPosition();
   }
 
+  public void setBodyPosition(Vector2 position, float angle, Vector2 linearVelocity) {
+    body.setTransform(position, angle);
+    body.setLinearVelocity(linearVelocity);
+  }
+
   public Player getPlayer() {
     return player;
+  }
+
+  public boolean isAccelerating() {
+    return isAccelerating;
+  }
+
+  public boolean isFiring() {
+    return isFiring;
+  }
+
+  public boolean isTurningLeft() {
+    return isTurningLeft;
+  }
+
+  public boolean isTurningRight() {
+    return isTurningRight;
+  }
+
+  public void setAccelerating(boolean value) {
+    isAccelerating = value;
+  }
+
+  public void setTurningLeft(boolean turningLeft) {
+    isTurningLeft = turningLeft;
+  }
+
+  public void setTurningRight(boolean turningRight) {
+    isTurningRight = turningRight;
+  }
+
+  public void setFiring(boolean firing) {
+    isFiring = firing;
   }
 
   private Vector2 setCoordinates(float minDistance, float maxDistance) {

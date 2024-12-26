@@ -8,14 +8,6 @@ buildscript {
     maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
     maven { url 'https://s01.oss.sonatype.org/content/repositories/snapshots/' }
   }
-  dependencies {
-    classpath "gradle.plugin.com.github.johnrengelman:shadow:7.1.2"
-
-  }
-}
-
-plugins {
-  id "com.github.johnrengelman.shadow" version "7.1.2"
 }
 
 allprojects {
@@ -33,7 +25,6 @@ allprojects {
 
 configure(subprojects) {
   apply plugin: 'java-library'
-  apply plugin: 'com.github.johnrengelman.shadow'
   sourceCompatibility = 11
 
   // From https://lyze.dev/2021/04/29/libGDX-Internal-Assets-List/

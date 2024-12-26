@@ -6,6 +6,7 @@ public class SpaceShipDTO {
   private Player player;
   private Vector2 position;
   private Vector2 linearVelocity;
+  private float angle;
 
   public SpaceShipDTO() {
   }
@@ -14,6 +15,7 @@ public class SpaceShipDTO {
     this.player = spaceShip.getPlayer();
     this.position = spaceShip.getPosition();
     this.linearVelocity = spaceShip.body.getLinearVelocity();
+    this.angle = spaceShip.body.getAngle();
   }
 
   public Player getPlayer() {
@@ -26,5 +28,9 @@ public class SpaceShipDTO {
 
   public Vector2 getLinearVelocity() {
     return linearVelocity;
+  }
+
+  public float getAngle() {
+    return angle;
   }
 }
