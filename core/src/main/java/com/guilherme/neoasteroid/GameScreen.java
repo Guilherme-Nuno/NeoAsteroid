@@ -13,6 +13,7 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
@@ -94,7 +95,7 @@ public class GameScreen implements Screen {
     tracerBulletTexture = new Texture("tracer_bullet.png");
 
     camera = new OrthographicCamera();
-    viewport = new ExtendViewport(250, 250, camera);
+    viewport = new ExtendViewport(150, 150, camera);
 
     Log.info("Entering render...");
   }
@@ -143,6 +144,7 @@ public class GameScreen implements Screen {
       return;
     }
 
+    // Create inputHandlers based on host or client
     if (inputHandler == null) {
       if (game.player.isHost()) {
         inputHandler = new InputHandlerHost(game, playerShip);
@@ -155,7 +157,6 @@ public class GameScreen implements Screen {
       }
     }
 
-    // TODO Add logic to handle ship movements.
     spaceShipsMovements();
 
     // Loop for timed events
@@ -211,7 +212,7 @@ public class GameScreen implements Screen {
 
       Planet highestPlanet = findPlanetHighestGravForce(satellite.body);
 
-      // TODO Temporarily acessing the body directly. Need to change
+      // TODO Temporarily accessing the body directly. Need to change
       applyGravitationalForce(satellite.body, highestPlanet);
 
       float distance = planets.get(0).getPosition().dst(satellite.body.getPosition());
@@ -258,8 +259,8 @@ public class GameScreen implements Screen {
 
     game.spriteBatch.end();
 
-    camera.position.set(playerShip.getPosition(), 0);
-    camera.update();
+    // Centers camera on mouse
+    setCameraPosition();
 
     world.step(delta, 6, 2);
 
@@ -278,17 +279,14 @@ public class GameScreen implements Screen {
 
   @Override
   public void pause() {
-    // TODO Auto-generated method stub
   }
 
   @Override
   public void resume() {
-    // TODO Auto-generated method stub
   }
 
   @Override
   public void hide() {
-    // TODO Auto-generated method stub
   }
 
   @Override
@@ -321,7 +319,7 @@ public class GameScreen implements Screen {
     satelliteBody.applyForceToCenter(force, true);
   }
 
-  private void setInicialOrbitVelocity(Body satelliteBody, Planet planet, float rotationDirection) {
+  private void setInitialOrbitVelocity(Body satelliteBody, Planet planet, float rotationDirection) {
     float satelliteDistance = planet.getPosition().dst(satelliteBody.getPosition());
     float setInitialVelocityMagnitude = rotationDirection * (float) Math
         .sqrt(planet.getGravity() * planet.getMass() / satelliteDistance);
@@ -433,7 +431,7 @@ public class GameScreen implements Screen {
 
         // Random direction for orbit. Add random num to rotation
         // int randomNum = Math.random() < 0.5 ? -1 : 1;
-        setInicialOrbitVelocity(newSatellite.body, planet, 1);
+        setInitialOrbitVelocity(newSatellite.body, planet, 1);
 
         hostServer.sendNewAsteroid(newSatellite);
       }
@@ -454,7 +452,7 @@ public class GameScreen implements Screen {
       }
 
       for (SpaceShip spaceShip : playersSpaceShips) {
-        setInicialOrbitVelocity(spaceShip.body, planets.get(0), 1);
+        setInitialOrbitVelocity(spaceShip.body, planets.get(0), 1);
 
         hostServer.sendNewSpaceShip(spaceShip);
       }
@@ -487,5 +485,17 @@ public class GameScreen implements Screen {
         spaceShip.rotateRight();
       }
     }
+  }
+
+  private void setCameraPosition() {
+    Vector3 mouseScreenPosition = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0);
+    Vector3 mouseWorldPosition = camera.unproject(mouseScreenPosition);
+
+    Vector2 cameraPosition = new Vector2((mouseWorldPosition.x + playerShip.getPosition().x) / 2 ,
+      (mouseWorldPosition.y + playerShip.getPosition().y) / 2);
+
+    camera.position.set(cameraPosition, 0);
+    camera.update();
+
   }
 }
