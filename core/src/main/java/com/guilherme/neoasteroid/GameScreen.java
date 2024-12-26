@@ -9,9 +9,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.Body;
@@ -96,6 +94,12 @@ public class GameScreen implements Screen {
 
     camera = new OrthographicCamera();
     viewport = new ExtendViewport(150, 150, camera);
+
+    Pixmap cursorPixmap = new Pixmap(Gdx.files.internal("cursor32.png"));
+    Cursor inGameCrosshair = Gdx.graphics.newCursor(cursorPixmap, 16, 16);
+    Gdx.graphics.setCursor(inGameCrosshair);
+
+    cursorPixmap.dispose();
 
     Log.info("Entering render...");
   }
@@ -494,7 +498,7 @@ public class GameScreen implements Screen {
     Vector2 cameraPosition = new Vector2((mouseWorldPosition.x + playerShip.getPosition().x) / 2 ,
       (mouseWorldPosition.y + playerShip.getPosition().y) / 2);
 
-    camera.position.set(cameraPosition, 0);
+    camera.position.lerp(new Vector3(cameraPosition.x, cameraPosition.y, 0), 0.08f);
     camera.update();
 
   }

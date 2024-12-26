@@ -6,7 +6,7 @@ import com.badlogic.gdx.InputProcessor;
 public class InputHandlerClient implements InputProcessor {
   private final Main game;
   private final SpaceShip playerShip;
-  private Message<SpaceShipDTO> spaceShipDTOMessage = new Message<>();
+  private final Message<SpaceShipDTO> spaceShipDTOMessage = new Message<>();
 
   public InputHandlerClient(Main game, SpaceShip playerShip) {
     this.game = game;
