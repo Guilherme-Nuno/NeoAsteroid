@@ -80,9 +80,11 @@ public class Main extends Game {
     endPoint.getKryo().register(SatelliteDTO.class);
     endPoint.getKryo().register(SpaceShipDTO.class);
     endPoint.getKryo().register(Vector2.class);
+    endPoint.getKryo().register(BulletDTO.class);
+    endPoint.getKryo().register(MousePositionDTO.class);
   }
 
-  /** Function to set up initial game struture */
+  /** Function to set up initial game structure */
   public void setupGame() {
     this.skin = new Skin(Gdx.files.internal("uiskin.json"));
     this.spriteBatch = new SpriteBatch();
@@ -105,7 +107,7 @@ public class Main extends Game {
   /**
    * Function to test connection with the serverserver. Doesn't check if Ip is
    * possible.
-   * 
+   *
    * @param client   Kryonet client
    * @param ipString String with ip of server)
    * @return true if connection established

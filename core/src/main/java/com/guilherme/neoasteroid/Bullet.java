@@ -14,14 +14,13 @@ import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 
 public class Bullet {
-  private World world;
-  private Vector2 origin;
+  private final World world;
+  private final Vector2 origin;
   private Vector2 direction;
   private int healthPoint;
-  private Texture bulletTexture;
   private float velocity;
   private float density = 0.01f;
-  private Sprite sprite;
+  private final Sprite sprite;
   public Body body;
   private float bulletWidth = 0.25f;
   private float bulletHeight = 0.075f;
@@ -32,7 +31,6 @@ public class Bullet {
     this.origin = origin;
     this.direction = direction;
     this.healthPoint = damage;
-    this.bulletTexture = bulletTexture;
     this.velocity = velocity;
     this.bulletWidth = bulletWidth;
     this.bulletHeight = bulletHeight;
@@ -42,7 +40,7 @@ public class Bullet {
     bodyDef.position.set(this.origin);
     this.body = world.createBody(bodyDef);
 
-    sprite = new Sprite(this.bulletTexture);
+    sprite = new Sprite(bulletTexture);
     sprite.setSize(this.bulletWidth, this.bulletHeight);
     sprite.setPosition(this.origin.x, this.origin.y);
 
@@ -89,9 +87,6 @@ public class Bullet {
   }
 
   public boolean isAlive() {
-    if (healthPoint <= 0) {
-      return false;
-    } else
-      return true;
+    return healthPoint > 0;
   }
 }

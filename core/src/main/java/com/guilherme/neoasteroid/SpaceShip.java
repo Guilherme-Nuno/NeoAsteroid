@@ -22,9 +22,10 @@ public class SpaceShip {
   private final Texture spaceShipImg = new Texture("space_ship_medium.png");
   public Body body;
   private final Sprite sprite;
-  // private float spaceShipRadius = 1.0f;
   private final float spaceShipWidth = 2.0f * 2;
   private final float spaceShipHeight = 2.6f * 2;
+  private final float rateOfFire;
+  private float rateOfFireTimer;
   private boolean isAccelerating = false;
   private boolean isTurningRight = false;
   private boolean isTurningLeft = false;
@@ -35,6 +36,8 @@ public class SpaceShip {
     this.position = spaceShipDTO.getPosition();
 
     acceleration = 33.3f;
+    rateOfFire = 0.25f;
+    rateOfFireTimer = rateOfFire;
 
     sprite = new Sprite(spaceShipImg);
     sprite.setSize(spaceShipWidth, spaceShipHeight);
@@ -70,6 +73,8 @@ public class SpaceShip {
 
     position = new Vector2(setCoordinates(80, 120));
     acceleration = 33.3f;
+    rateOfFire = 0.25f;
+    rateOfFireTimer = rateOfFire;
 
     sprite = new Sprite(spaceShipImg);
     sprite.setSize(spaceShipWidth, spaceShipHeight);
@@ -80,9 +85,6 @@ public class SpaceShip {
     bodyDef.position.set(position);
     body = world.createBody(bodyDef);
     body.setAngularDamping(25.0f);
-
-    // CircleShape shape = new CircleShape();
-    // shape.setRadius(spaceShipRadius);
 
     PolygonShape shape = new PolygonShape();
     shape.setAsBox(this.spaceShipWidth / 2, this.spaceShipHeight / 2);
@@ -175,8 +177,18 @@ public class SpaceShip {
     float x = distance * (float) Math.cos(angle);
     float y = distance * (float) Math.sin(angle);
 
-    Vector2 position = new Vector2(x, y);
+    return new Vector2(x, y);
+  }
 
-    return position;
+  public float getRateOfFireTimer() {
+    return rateOfFireTimer;
+  }
+
+  public void setRateOfFireTimer(float rateOfFireTimer) {
+    this.rateOfFireTimer = rateOfFireTimer;
+  }
+
+  public float getRateOfFire() {
+    return rateOfFire;
   }
 }

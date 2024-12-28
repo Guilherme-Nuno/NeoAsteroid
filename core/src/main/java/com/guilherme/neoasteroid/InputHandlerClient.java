@@ -28,11 +28,6 @@ public class InputHandlerClient implements InputProcessor {
         spaceShipDTOMessage.setMessage("inputStartRight", new SpaceShipDTO(playerShip));
         game.client.sendTCP(spaceShipDTOMessage);
         return  true;
-      case Input.Buttons.LEFT:
-        spaceShipDTOMessage.setMessage("inputStartMouseLeft", new SpaceShipDTO(playerShip));
-        // TODO Need to send mouse position too
-        game.client.sendTCP(spaceShipDTOMessage);
-        return  true;
     }
     return false;
   }
@@ -52,11 +47,6 @@ public class InputHandlerClient implements InputProcessor {
         spaceShipDTOMessage.setMessage("inputEndRight", new SpaceShipDTO(playerShip));
         game.client.sendTCP(spaceShipDTOMessage);
         return  true;
-      case Input.Buttons.LEFT:
-        spaceShipDTOMessage.setMessage("inputEndMouseLeft", new SpaceShipDTO(playerShip));
-        // TODO Need to send mouse position too
-        game.client.sendTCP(spaceShipDTOMessage);
-        return  true;
     }
     return false;
   }
@@ -68,11 +58,21 @@ public class InputHandlerClient implements InputProcessor {
 
   @Override
   public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+    if (button == Input.Buttons.LEFT) {
+      spaceShipDTOMessage.setMessage("inputStartMouseLeft", new SpaceShipDTO(playerShip));
+      game.client.sendTCP(spaceShipDTOMessage);
+      return true;
+    }
     return false;
   }
 
   @Override
   public boolean touchUp(int screenX, int screenY, int pointer, int button) {
+    if (button == Input.Buttons.LEFT) {
+      spaceShipDTOMessage.setMessage("inputEndMouseLeft", new SpaceShipDTO(playerShip));
+      game.client.sendTCP(spaceShipDTOMessage);
+      return true;
+    }
     return false;
   }
 

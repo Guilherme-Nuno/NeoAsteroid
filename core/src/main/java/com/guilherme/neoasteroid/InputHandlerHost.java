@@ -1,16 +1,22 @@
 package com.guilherme.neoasteroid;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
+import com.esotericsoftware.minlog.Log;
 
 public class InputHandlerHost implements InputProcessor {
   private final Main game;
+  private final GameScreen gameScreen;
   private final SpaceShip playerShip;
   private Message<SpaceShipDTO> spaceShipDTOMessage = new Message<>();
 
-  public InputHandlerHost(Main game, SpaceShip playerShip) {
+  public InputHandlerHost(Main game, GameScreen gameScreen, SpaceShip playerShip) {
     this.game = game;
     this.playerShip = playerShip;
+    this.gameScreen = gameScreen;
   }
 
   @Override
@@ -26,9 +32,7 @@ public class InputHandlerHost implements InputProcessor {
         playerShip.setTurningRight(true);
         return  true;
       case Input.Buttons.LEFT:
-        spaceShipDTOMessage.setMessage("inputStartMouseLeft", new SpaceShipDTO(playerShip));
-        // TODO Need to send mouse position too
-        game.client.sendTCP(spaceShipDTOMessage);
+
         return  true;
     }
     return false;
@@ -46,11 +50,6 @@ public class InputHandlerHost implements InputProcessor {
       case Input.Keys.RIGHT:
         playerShip.setTurningRight(false);
         return  true;
-      case Input.Buttons.LEFT:
-        spaceShipDTOMessage.setMessage("inputEndMouseLeft", new SpaceShipDTO(playerShip));
-        // TODO Need to send mouse position too
-        game.client.sendTCP(spaceShipDTOMessage);
-        return  true;
     }
     return false;
   }
@@ -62,11 +61,19 @@ public class InputHandlerHost implements InputProcessor {
 
   @Override
   public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+    if (button == Input.Buttons.LEFT) {
+      playerShip.setFiring(true);
+      return true;
+    }
     return false;
   }
 
   @Override
   public boolean touchUp(int screenX, int screenY, int pointer, int button) {
+    if (button == Input.Buttons.LEFT) {
+      playerShip.setFiring(false);
+      return true;
+    }
     return false;
   }
 

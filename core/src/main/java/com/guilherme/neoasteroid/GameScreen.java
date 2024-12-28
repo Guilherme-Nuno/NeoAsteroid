@@ -19,7 +19,7 @@ import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.esotericsoftware.minlog.Log;
 
 public class GameScreen implements Screen {
-  private final Main game;
+  final Main game;
 
   private final HostServer hostServer;
 
@@ -43,9 +43,9 @@ public class GameScreen implements Screen {
   private int earthHP;
 
   public SpaceShip playerShip;
-  private final Array<Bullet> bullets;
+  public final Array<Bullet> bullets;
   private int bulletCount = 0;
-  private float rateOfFireTimer = 0.0f;
+  public float rateOfFireTimer = 0.0f;
   public List<SpaceShip> playersSpaceShips;
 
   public boolean allPlayersLoadingComplete = false;
@@ -90,7 +90,7 @@ public class GameScreen implements Screen {
 
     bullets = new Array<>();
     bulletTexture = new Texture("bullet.png");
-    tracerBulletTexture = new Texture("tracer_bullet.png");
+    tracerBulletTexture = new Texture("laser.png");
 
     camera = new OrthographicCamera();
     viewport = new ExtendViewport(150, 150, camera);
@@ -151,7 +151,7 @@ public class GameScreen implements Screen {
     // Create inputHandlers based on host or client
     if (inputHandler == null) {
       if (game.player.isHost()) {
-        inputHandler = new InputHandlerHost(game, playerShip);
+        inputHandler = new InputHandlerHost(game, this, playerShip);
         Gdx.input.setInputProcessor(inputHandler);
         Log.info("Created Host InputHandler");
       } else {
@@ -162,6 +162,24 @@ public class GameScreen implements Screen {
     }
 
     spaceShipsMovements();
+
+    // Update mouse position
+    if (!game.player.isHost()) {
+      Vector3 mouseScreenPosition = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0);
+      Vector3 mouseWorldPosition = camera.unproject(mouseScreenPosition);
+
+      Vector2 mouseCoordinates = new Vector2(mouseWorldPosition.x, mouseWorldPosition.y);
+      MousePositionDTO mousePositionDTO = new MousePositionDTO(game.player.getName(), mouseCoordinates);
+      Message<MousePositionDTO> mousePositionDTOMessage = new Message<>();
+      mousePositionDTOMessage.setMessage("mousePosition",mousePositionDTO);
+      game.client.sendTCP(mousePositionDTOMessage);
+    } else {
+      Vector3 mouseScreenPosition = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0);
+      Vector3 mouseWorldPosition = camera.unproject(mouseScreenPosition);
+
+
+      game.player.setMousePosition(new Vector2(mouseWorldPosition.x, mouseWorldPosition.y));
+    }
 
     // Loop for timed events
     if (game.player.isHost()) {
@@ -177,7 +195,7 @@ public class GameScreen implements Screen {
       // Update players and asteroids position
       updateTimer += delta;
 
-      if (updateTimer > 0.1) {
+      if (updateTimer > 0.02) {
         hostServer.updateAllPlayersPosition();
 
         for (Satellite asteroid : satellites.values()) {
@@ -187,7 +205,18 @@ public class GameScreen implements Screen {
       }
     }
 
-    rateOfFireTimer += delta;
+    // Spaceship firing logic
+    for (SpaceShip spaceShip : playersSpaceShips) {
+      if (spaceShip.isFiring()) {
+        spaceShip.setRateOfFireTimer(spaceShip.getRateOfFireTimer() + delta);
+        if (spaceShip.getRateOfFireTimer() > spaceShip.getRateOfFire()) {
+          Vector2 direction = new Vector2(spaceShip.getPlayer().getMousePosition()).sub(spaceShip.getPosition()).nor();
+
+          createNewBullet(spaceShip, direction);
+          spaceShip.setRateOfFireTimer(0);
+        }
+      }
+    }
 
     // Log for Earth Health
     int tempHP = planets.get(0).getHealthPoints();
@@ -239,6 +268,7 @@ public class GameScreen implements Screen {
       }
     }
 
+    // Render of objects
     game.spriteBatch.setProjectionMatrix(camera.combined);
     game.spriteBatch.begin();
     // spriteBatch.draw(backgroundTexture, -600 / 2, -340 / 2, 600, 340);
@@ -501,5 +531,25 @@ public class GameScreen implements Screen {
     camera.position.lerp(new Vector3(cameraPosition.x, cameraPosition.y, 0), 0.08f);
     camera.update();
 
+  }
+
+  /**
+   * Creates a new bullet with origin at playerShip and with a certain direction
+   * @param spaceShip Spaceship to get origin of shot
+   * @param direction Vector2 with direction of shot
+   */
+  public void createNewBullet(SpaceShip spaceShip, Vector2 direction) {
+    if (game.player.isHost()) {
+      Bullet bullet = new Bullet(world, direction, spaceShip.getPosition(), tracerBulletTexture, 30.0f * 2, 10,
+        2.0f * 2,
+        0.6f * 2);
+      bullets.add(bullet);
+      bulletCount++;
+
+      Message<BulletDTO> newBulletMessage = new Message<>();
+      newBulletMessage.setMessage("newBullet", new BulletDTO(spaceShip.getPosition(), direction));
+
+      game.server.sendToAllTCP(newBulletMessage);
+    }
   }
 }

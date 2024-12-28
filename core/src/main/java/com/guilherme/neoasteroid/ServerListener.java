@@ -128,7 +128,7 @@ public class ServerListener extends Listener {
           }
           break;
         case "inputStartUp":
-          playerSpaceShip = (SpaceShipDTO)  message.getPayload();
+          playerSpaceShip = (SpaceShipDTO) message.getPayload();
 
           for (SpaceShip spaceShip : gameScreen.playersSpaceShips) {
             if (spaceShip.getPlayer().getName().equals(playerSpaceShip.getPlayer().getName())) {
@@ -137,7 +137,7 @@ public class ServerListener extends Listener {
           }
           break;
         case "inputEndUp":
-          playerSpaceShip = (SpaceShipDTO)  message.getPayload();
+          playerSpaceShip = (SpaceShipDTO) message.getPayload();
 
           for (SpaceShip spaceShip : gameScreen.playersSpaceShips) {
             if (spaceShip.getPlayer().getName().equals(playerSpaceShip.getPlayer().getName())) {
@@ -146,7 +146,7 @@ public class ServerListener extends Listener {
           }
           break;
         case "inputStartLeft":
-          playerSpaceShip = (SpaceShipDTO)  message.getPayload();
+          playerSpaceShip = (SpaceShipDTO) message.getPayload();
 
           for (SpaceShip spaceShip : gameScreen.playersSpaceShips) {
             if (spaceShip.getPlayer().getName().equals(playerSpaceShip.getPlayer().getName())) {
@@ -155,7 +155,7 @@ public class ServerListener extends Listener {
           }
           break;
         case "inputEndLeft":
-          playerSpaceShip = (SpaceShipDTO)  message.getPayload();
+          playerSpaceShip = (SpaceShipDTO) message.getPayload();
 
           for (SpaceShip spaceShip : gameScreen.playersSpaceShips) {
             if (spaceShip.getPlayer().getName().equals(playerSpaceShip.getPlayer().getName())) {
@@ -164,7 +164,7 @@ public class ServerListener extends Listener {
           }
           break;
         case "inputStartRight":
-          playerSpaceShip = (SpaceShipDTO)  message.getPayload();
+          playerSpaceShip = (SpaceShipDTO) message.getPayload();
 
           for (SpaceShip spaceShip : gameScreen.playersSpaceShips) {
             if (spaceShip.getPlayer().getName().equals(playerSpaceShip.getPlayer().getName())) {
@@ -173,11 +173,38 @@ public class ServerListener extends Listener {
           }
           break;
         case "inputEndRight":
-          playerSpaceShip = (SpaceShipDTO)  message.getPayload();
+          playerSpaceShip = (SpaceShipDTO) message.getPayload();
 
           for (SpaceShip spaceShip : gameScreen.playersSpaceShips) {
             if (spaceShip.getPlayer().getName().equals(playerSpaceShip.getPlayer().getName())) {
               spaceShip.setTurningRight(false);
+            }
+          }
+          break;
+        case "inputStartMouseLeft":
+          playerSpaceShip = (SpaceShipDTO) message.getPayload();
+
+          for (SpaceShip spaceShip : gameScreen.playersSpaceShips) {
+            if (spaceShip.getPlayer().getName().equals(playerSpaceShip.getPlayer().getName())) {
+              spaceShip.setFiring(true);
+            }
+          }
+          break;
+        case "inputEndMouseLeft":
+          playerSpaceShip = (SpaceShipDTO) message.getPayload();
+
+          for (SpaceShip spaceShip : gameScreen.playersSpaceShips) {
+            if (spaceShip.getPlayer().getName().equals(playerSpaceShip.getPlayer().getName())) {
+              spaceShip.setFiring(false);
+            }
+          }
+          break;
+        case "mousePosition":
+          MousePositionDTO mousePositionDTO = (MousePositionDTO) message.getPayload();
+
+          for (Player player : gameScreen.game.players) {
+            if (player.getName().equals(mousePositionDTO.getPlayerName())) {
+              player.setMousePosition(mousePositionDTO.getMousePosition());
             }
           }
           break;

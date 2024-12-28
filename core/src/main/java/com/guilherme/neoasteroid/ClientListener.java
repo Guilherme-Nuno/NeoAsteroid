@@ -141,11 +141,25 @@ public class ClientListener extends Listener {
             for (SpaceShip spaceShip : gameScreen.playersSpaceShips) {
               if (spaceShip.getPlayer().getName().equals(spaceShipDTO.getPlayer().getName())) {
                 spaceShip.setBodyPosition(spaceShipDTO.getPosition(), spaceShipDTO.getAngle(), spaceShipDTO.getLinearVelocity());
-                Log.info("Ship Position updated: " + spaceShipDTO.getPosition() + " and " + spaceShip.getPosition());
               }
             }
           });
           break;
+        case "newBullet":
+          BulletDTO bulletDTO = (BulletDTO) message.getPayload();
+          gameScreen = (GameScreen) game.getScreen();
+
+          Gdx.app.postRunnable(() -> {
+            gameScreen.bullets.add(new Bullet(
+              gameScreen.world,
+              bulletDTO.getDirection(),
+              bulletDTO.getOrigin(),
+              gameScreen.tracerBulletTexture,
+              30.0f * 2,
+              10,
+              2.0f * 2,
+              0.6f * 2));
+          });
 
         default:
           break;
