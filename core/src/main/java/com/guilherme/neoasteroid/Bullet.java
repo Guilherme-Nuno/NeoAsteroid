@@ -19,7 +19,7 @@ public class Bullet {
   private Vector2 direction;
   private int healthPoint;
   private float velocity;
-  private float density = 0.01f;
+  private float density = 0.00000001f;
   private final Sprite sprite;
   public Body body;
   private float bulletWidth = 0.25f;
@@ -35,10 +35,14 @@ public class Bullet {
     this.bulletWidth = bulletWidth;
     this.bulletHeight = bulletHeight;
 
+    float angle = (float) Math.atan2(this.direction.y, this.direction.x);
+
     BodyDef bodyDef = new BodyDef();
     bodyDef.type = BodyType.DynamicBody;
     bodyDef.position.set(this.origin);
     this.body = world.createBody(bodyDef);
+
+    body.setTransform(this.origin, angle);
 
     sprite = new Sprite(bulletTexture);
     sprite.setSize(this.bulletWidth, this.bulletHeight);

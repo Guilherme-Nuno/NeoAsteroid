@@ -30,6 +30,12 @@ public class SpaceShip {
   private boolean isTurningRight = false;
   private boolean isTurningLeft = false;
   private boolean isFiring = false;
+  private int energy = 100;
+  private float energyTimer = 0;
+  private float energyRechargeRate = 0.2f;
+  private int shield = 100;
+  private int hull = 100;
+  private boolean isAlive = true;
 
   public SpaceShip(World world, SpaceShipDTO spaceShipDTO) {
     this.player = spaceShipDTO.getPlayer();
@@ -191,4 +197,49 @@ public class SpaceShip {
   public float getRateOfFire() {
     return rateOfFire;
   }
+
+  public void setEnergyTimer(float energyTimer) {
+    this.energyTimer = energyTimer;
+  }
+
+  public int getEnergy() {
+    return energy;
+  }
+
+  public int getHull() {
+    return hull;
+  }
+
+  public int getShield() {
+    return shield;
+  }
+
+  public float getEnergyTimer() {
+    return energyTimer;
+  }
+
+  public float getEnergyRechargeRate() {
+    return energyRechargeRate;
+  }
+
+  public void setEnergy(int energy) {
+    this.energy = energy;
+  }
+
+  public void setHull(int hull) {
+    this.hull = hull;
+  }
+
+  public void setShield(int shield) {
+    this.shield = shield;
+  }
+
+  public void setAlive(boolean alive) {
+    isAlive = alive;
+  }
+
+  public boolean isAlive() {
+    return isAlive;
+  }
 }
+
