@@ -98,6 +98,12 @@ public class ClientListener extends Listener {
             Log.info("Load Complete!");
           }
           break;
+        case "updateAsteroid":
+          gameScreen = (GameScreen) game.getScreen();
+          SatelliteDTO updateSatellite = (SatelliteDTO) message.getPayload();
+
+          gameScreen.satellites.get(updateSatellite.getId()).updateFromDTO(updateSatellite);
+        break;
 
         case "allPlayersLoaded":
           gameScreen = (GameScreen) game.getScreen();
