@@ -28,7 +28,7 @@ public class Main extends Game {
   public Server server;
   public Client client;
 
-  public Skin skin;
+  public Skin uiSkin;
   /** List of String that has the player names of the current game */
   public List<String> playerList;
   /** ArrayList of Player object that stores the players in the current game */
@@ -86,7 +86,7 @@ public class Main extends Game {
 
   /** Function to set up initial game structure */
   public void setupGame() {
-    this.skin = new Skin(Gdx.files.internal("uiskin.json"));
+    this.uiSkin = new Skin(Gdx.files.internal("uiskin.json"));
     this.spriteBatch = new SpriteBatch();
 
     this.server = new Server(4000000, 2000000);
@@ -98,18 +98,18 @@ public class Main extends Game {
     this.player = new Player();
 
     this.players = new ArrayList<>();
-    this.playerList = new List<>(skin);
+    this.playerList = new List<>(uiSkin);
 
     this.chat = new Array<>();
-    this.chatList = new List<>(skin);
+    this.chatList = new List<>(uiSkin);
   }
 
   /**
-   * Function to test connection with the serverserver. Doesn't check if Ip is
+   * Function to test connection with the server. Doesn't check if Ip is
    * possible.
    *
    * @param client   Kryonet client
-   * @param ipString String with ip of server)
+   * @param ipString String with ip of server
    * @return true if connection established
    */
   public boolean testServerConnection(Client client, String ipString) {

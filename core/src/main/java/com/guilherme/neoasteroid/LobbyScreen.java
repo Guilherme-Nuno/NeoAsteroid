@@ -15,12 +15,14 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 
 public class LobbyScreen implements Screen {
-  private Main game;
-  private Stage stage;
+  private final Main game;
+  private final Stage stage;
 
   public LobbyScreen(Main game) {
     this.game = game;
     stage = new Stage();
+
+    stage.setDebugAll(true);
 
     if (this.game.player.isHost()) {
       // Inicializa a lista de jogadores e exibe no Lobby
@@ -51,11 +53,11 @@ public class LobbyScreen implements Screen {
     table.setFillParent(true);
     stage.addActor(table);
 
-    ScrollPane chatPane = new ScrollPane(this.game.chatList, this.game.skin);
+    ScrollPane chatPane = new ScrollPane(this.game.chatList, this.game.uiSkin);
 
-    TextField messageTextField = new TextField("", this.game.skin);
+    TextField messageTextField = new TextField("", this.game.uiSkin);
 
-    TextButton sendMessageButton = new TextButton("Send", this.game.skin);
+    TextButton sendMessageButton = new TextButton("Send", this.game.uiSkin);
     sendMessageButton.addListener(new ClickListener() {
       @Override
       public void clicked(InputEvent event, float x, float y) {
@@ -89,10 +91,10 @@ public class LobbyScreen implements Screen {
     chatTable.row();
     chatTable.add(chatMessageTable);
 
-    ScrollPane scrollPane = new ScrollPane(this.game.playerList, this.game.skin);
+    ScrollPane scrollPane = new ScrollPane(this.game.playerList, this.game.uiSkin);
 
     // Botão para sair do lobby
-    TextButton exitButton = new TextButton("Exit Lobby", this.game.skin);
+    TextButton exitButton = new TextButton("Exit Lobby", this.game.uiSkin);
     exitButton.addListener(new ClickListener() {
 
       @Override
@@ -110,7 +112,7 @@ public class LobbyScreen implements Screen {
     });
 
     // Botão para começar o jogo (visível apenas para o host)
-    TextButton startGameButton = new TextButton("Start Game", this.game.skin);
+    TextButton startGameButton = new TextButton("Start Game", this.game.uiSkin);
     startGameButton.addListener(new ClickListener() {
       @Override
       public void clicked(InputEvent event, float x, float y) {
@@ -122,8 +124,8 @@ public class LobbyScreen implements Screen {
     });
 
     // Labels e organização dos elementos na tabela
-    table.add(new Label("Chat", this.game.skin)).center().padBottom(20);
-    table.add(new Label("Players", this.game.skin)).center().padBottom(20);
+    table.add(new Label("Chat", this.game.uiSkin)).center().padBottom(20);
+    table.add(new Label("Players", this.game.uiSkin)).center().padBottom(20);
     table.row();
     table.add(chatTable).width(400).height(400).padBottom(20);
     table.add(scrollPane).width(200).height(400).padBottom(20);
@@ -158,7 +160,6 @@ public class LobbyScreen implements Screen {
 
   @Override
   public void pause() {
-    // TODO Auto-generated method stub
   }
 
   @Override
@@ -172,6 +173,6 @@ public class LobbyScreen implements Screen {
   @Override
   public void dispose() {
     stage.dispose();
-    this.game.skin.dispose();
+    this.game.uiSkin.dispose();
   }
 }

@@ -19,39 +19,30 @@ import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.esotericsoftware.minlog.Log;
 
 public class GameScreen implements Screen {
-  final Main game;
-
+  public final Main game;
   private final HostServer hostServer;
-
   public World world;
-
   private float updateTimer = 0.0f;
-
   public OrthographicCamera camera;
   private final ExtendViewport viewport;
-
   private float timeToAsteroid = 0.0f;
-  // private Texture backgroundTexture;
+  private Texture backgroundTexture;
   public Texture satelliteTexture;
   public Texture bulletTexture;
   public Texture tracerBulletTexture;
-
   private int satelliteID = 0;
   public Map<Integer, Satellite> satellites;
-
   private final Array<Planet> planets;
   private int earthHP;
-
   public SpaceShip playerShip;
   public final Array<Bullet> bullets;
   private int bulletCount = 0;
   public float rateOfFireTimer = 0.0f;
   public List<SpaceShip> playersSpaceShips;
-
   public boolean allPlayersLoadingComplete = false;
-
   private final List<String> playersLoadingCompleteTempList;
   private InputProcessor inputHandler;
+  private GameHUD gameHUD;
 
   public GameScreen(Main game) {
     this.game = game;
@@ -66,7 +57,7 @@ public class GameScreen implements Screen {
     world = new World(new Vector2(0, 0), true);
     world.setContactListener(new WorldContactListener());
 
-    // backgroundTexture = new Texture("background.png");
+    backgroundTexture = new Texture("background.png");
     satelliteTexture = new Texture("satellite_min.png");
 
     planets = new Array<>();
@@ -93,7 +84,7 @@ public class GameScreen implements Screen {
     tracerBulletTexture = new Texture("laser.png");
 
     camera = new OrthographicCamera();
-    viewport = new ExtendViewport(150, 150, camera);
+    viewport = new ExtendViewport(300, 300, camera);
 
     Pixmap cursorPixmap = new Pixmap(Gdx.files.internal("cursor32.png"));
     Cursor inGameCrosshair = Gdx.graphics.newCursor(cursorPixmap, 16, 16);
@@ -146,6 +137,15 @@ public class GameScreen implements Screen {
         }
       }
       return;
+    }
+
+    /*
+    Game Start
+     */
+
+    // Create game HUD
+    if (gameHUD == null) {
+      gameHUD = new GameHUD(this, game.uiSkin, viewport);
     }
 
     // Create inputHandlers based on host or client
@@ -271,7 +271,7 @@ public class GameScreen implements Screen {
     // Render of objects
     game.spriteBatch.setProjectionMatrix(camera.combined);
     game.spriteBatch.begin();
-    // spriteBatch.draw(backgroundTexture, -600 / 2, -340 / 2, 600, 340);
+    // game.spriteBatch.draw(backgroundTexture, -1280 / 2, -640 / 2, 1280 * 2, 640 * 2);
 
     for (
 
@@ -293,16 +293,13 @@ public class GameScreen implements Screen {
 
     game.spriteBatch.end();
 
+    gameHUD.updateBars();
+    gameHUD.render(delta);
+
     // Centers camera on mouse
     setCameraPosition();
 
     world.step(delta, 6, 2);
-
-    // for (Satellite satellite : satellites) {
-    // // Gdx.app.log("Main", "Position: " + satellite.body.getPosition());
-    // // Gdx.app.log("Satellite", "Velocity: " +
-    // satellite.body.getLinearVelocity());
-    // }
   }
 
   @Override

@@ -20,9 +20,9 @@ public class JoinScreen implements Screen {
     this.stage = new Stage(new ScreenViewport());
     Gdx.input.setInputProcessor(stage);
 
-    TextField getIpTextField = new TextField("", this.game.skin);
+    TextField getIpTextField = new TextField("", this.game.uiSkin);
 
-    TextButton connectIPButton = new TextButton("Connect", this.game.skin);
+    TextButton connectIPButton = new TextButton("Connect", this.game.uiSkin);
     connectIPButton.addListener(new ClickListener() {
       @Override
       public void clicked(InputEvent event, float x, float y) {

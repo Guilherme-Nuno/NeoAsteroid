@@ -10,15 +10,15 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
 public class MainMenuScreen implements Screen {
-  private Main game;
-  private Stage stage;
+  private final Main game;
+  private final Stage stage;
 
   public MainMenuScreen(Main game) {
     this.game = game;
     this.stage = new Stage(new ScreenViewport());
     Gdx.input.setInputProcessor(stage);
 
-    TextButton startButton = new TextButton("Start Game", game.skin);
+    TextButton startButton = new TextButton("Start Game", game.uiSkin);
     startButton.setSize(200, 50);
     startButton.setPosition(Gdx.graphics.getWidth() / 2f - startButton.getWidth() / 2,
         Gdx.graphics.getHeight() / 2f + startButton.getHeight() + 35);
@@ -30,7 +30,7 @@ public class MainMenuScreen implements Screen {
       }
     });
 
-    TextButton joinGameButton = new TextButton("Join Game", game.skin);
+    TextButton joinGameButton = new TextButton("Join Game", game.uiSkin);
     joinGameButton.setSize(200, 50);
     joinGameButton.setPosition(Gdx.graphics.getWidth() / 2f - joinGameButton.getWidth() / 2,
         Gdx.graphics.getHeight() / 2f + joinGameButton.getHeight() / 2);
@@ -42,12 +42,12 @@ public class MainMenuScreen implements Screen {
       }
     });
 
-    TextButton testConnectionButton = new TextButton("Test Connection", game.skin);
+    TextButton testConnectionButton = new TextButton("Test Connection", game.uiSkin);
     testConnectionButton.setSize(200, 50);
     testConnectionButton.setPosition(Gdx.graphics.getWidth() / 2f - testConnectionButton.getWidth() / 2,
         Gdx.graphics.getHeight() / 2f - 35);
 
-    Label testConnectionResult = new Label("", game.skin);
+    Label testConnectionResult = new Label("", game.uiSkin);
     testConnectionResult.setPosition(Gdx.graphics.getWidth() / 2f + testConnectionButton.getWidth() / 2 + 10,
         testConnectionButton.getY() + testConnectionButton.getHeight() / 2 - testConnectionResult.getHeight() / 2);
 
@@ -63,7 +63,7 @@ public class MainMenuScreen implements Screen {
       }
     });
 
-    TextButton exitGameButton = new TextButton("Exit Game", game.skin);
+    TextButton exitGameButton = new TextButton("Exit Game", game.uiSkin);
     exitGameButton.setSize(200, 50);
     exitGameButton.setPosition(Gdx.graphics.getWidth() / 2f - exitGameButton.getWidth() / 2f,
         Gdx.graphics.getHeight() / 4f + exitGameButton.getHeight() / 2f);
@@ -113,6 +113,6 @@ public class MainMenuScreen implements Screen {
   @Override
   public void dispose() {
     stage.dispose();
-    game.skin.dispose();
+    game.uiSkin.dispose();
   }
 }
