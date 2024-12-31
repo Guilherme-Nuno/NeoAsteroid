@@ -30,11 +30,14 @@ public class SpaceShip {
   private boolean isTurningRight = false;
   private boolean isTurningLeft = false;
   private boolean isFiring = false;
-  private int energy = 100;
+  private float energy = 100;
+  private float maxEnergy = 100;
+  private float shotEnergy = 2;
   private float energyTimer = 0;
-  private float energyRechargeRate = 0.2f;
-  private int shield = 100;
-  private int hull = 100;
+  private float energyRechargeRate = 5;
+  private float shield = 10;
+  private float maxShield = 100;
+  private float hull = 100;
   private boolean isAlive = true;
 
   public SpaceShip(World world, SpaceShipDTO spaceShipDTO) {
@@ -202,15 +205,15 @@ public class SpaceShip {
     this.energyTimer = energyTimer;
   }
 
-  public int getEnergy() {
+  public float getEnergy() {
     return energy;
   }
 
-  public int getHull() {
+  public float getHull() {
     return hull;
   }
 
-  public int getShield() {
+  public float getShield() {
     return shield;
   }
 
@@ -222,15 +225,15 @@ public class SpaceShip {
     return energyRechargeRate;
   }
 
-  public void setEnergy(int energy) {
+  public void setEnergy(float energy) {
     this.energy = energy;
   }
 
-  public void setHull(int hull) {
+  public void setHull(float hull) {
     this.hull = hull;
   }
 
-  public void setShield(int shield) {
+  public void setShield(float shield) {
     this.shield = shield;
   }
 
@@ -240,6 +243,18 @@ public class SpaceShip {
 
   public boolean isAlive() {
     return isAlive;
+  }
+
+  public float getShotEnergy() {
+    return shotEnergy;
+  }
+
+  public float getMaxEnergy() {
+    return maxEnergy;
+  }
+
+  public float getMaxShield() {
+    return maxShield;
   }
 }
 

@@ -205,16 +205,28 @@ public class GameScreen implements Screen {
       }
     }
 
-    // Spaceship firing logic
+    // Spaceship logic
     for (SpaceShip spaceShip : playersSpaceShips) {
       if (spaceShip.isFiring()) {
         spaceShip.setRateOfFireTimer(spaceShip.getRateOfFireTimer() + delta);
         if (spaceShip.getRateOfFireTimer() > spaceShip.getRateOfFire()) {
-          Vector2 direction = new Vector2(spaceShip.getPlayer().getMousePosition()).sub(spaceShip.getPosition()).nor();
+          if(spaceShip.getEnergy() >= spaceShip.getShotEnergy()){
+            Vector2 direction = new Vector2(spaceShip.getPlayer().getMousePosition()).sub(spaceShip.getPosition()).nor();
 
-          createNewBullet(spaceShip, direction);
-          spaceShip.setRateOfFireTimer(0);
+            createNewBullet(spaceShip, direction);
+            spaceShip.setRateOfFireTimer(0);
+            spaceShip.setEnergy(spaceShip.getEnergy() - spaceShip.getShotEnergy());
+          }
         }
+      }
+
+      float nextEnergy = spaceShip.getEnergy() + spaceShip.getEnergyRechargeRate() * delta;
+
+      spaceShip.setEnergy(Math.min(nextEnergy, spaceShip.getMaxEnergy()));
+
+      if (nextEnergy > spaceShip.getMaxEnergy()) {
+        float nextShield = spaceShip.getShield()+ spaceShip.getEnergyRechargeRate() / 2 * delta;
+        spaceShip.setShield(Math.min(nextShield, spaceShip.getMaxShield()));
       }
     }
 
