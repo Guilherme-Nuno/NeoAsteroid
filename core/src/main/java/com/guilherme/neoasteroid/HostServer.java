@@ -3,6 +3,7 @@ package com.guilherme.neoasteroid;
 import java.util.ArrayList;
 
 import com.esotericsoftware.minlog.Log;
+import com.guilherme.neoasteroid.spaceship.SpaceShip;
 
 public class HostServer {
   private Main game;
@@ -13,7 +14,7 @@ public class HostServer {
 
   /**
    * Sends a satelliteDTO to all clients connected.
-   * 
+   *
    * @param satellite
    */
   public void sendNewAsteroid(Satellite satellite) {
@@ -29,7 +30,7 @@ public class HostServer {
    * Sends a message to update a particular asteroid on all clients. Should be
    * sent when something happens to any particular asteroid like a contact or hit
    * by a bullet.
-   * 
+   *
    * @param satellite
    */
   public void sendUpdateAsteroid(Satellite satellite) {
@@ -56,7 +57,7 @@ public class HostServer {
 
   /**
    * Message sent to all players to create a new SpaceShip for a player.
-   * 
+   *
    * @param spaceShip
    */
   public void sendNewSpaceShip(SpaceShip spaceShip) {

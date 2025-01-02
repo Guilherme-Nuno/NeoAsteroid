@@ -17,6 +17,7 @@ import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.esotericsoftware.minlog.Log;
+import com.guilherme.neoasteroid.spaceship.SpaceShip;
 
 public class GameScreen implements Screen {
   public final Main game;
@@ -207,27 +208,7 @@ public class GameScreen implements Screen {
 
     // Spaceship logic
     for (SpaceShip spaceShip : playersSpaceShips) {
-      if (spaceShip.isFiring()) {
-        spaceShip.setRateOfFireTimer(spaceShip.getRateOfFireTimer() + delta);
-        if (spaceShip.getRateOfFireTimer() > spaceShip.getRateOfFire()) {
-          if(spaceShip.getEnergy() >= spaceShip.getShotEnergy()){
-            Vector2 direction = new Vector2(spaceShip.getPlayer().getMousePosition()).sub(spaceShip.getPosition()).nor();
-
-            createNewBullet(spaceShip, direction);
-            spaceShip.setRateOfFireTimer(0);
-            spaceShip.setEnergy(spaceShip.getEnergy() - spaceShip.getShotEnergy());
-          }
-        }
-      }
-
-      float nextEnergy = spaceShip.getEnergy() + spaceShip.getEnergyRechargeRate() * delta;
-
-      spaceShip.setEnergy(Math.min(nextEnergy, spaceShip.getMaxEnergy()));
-
-      if (nextEnergy > spaceShip.getMaxEnergy()) {
-        float nextShield = spaceShip.getShield()+ spaceShip.getEnergyRechargeRate() / 2 * delta;
-        spaceShip.setShield(Math.min(nextShield, spaceShip.getMaxShield()));
-      }
+      spaceShip.simulate(this, delta);
     }
 
     // Log for Earth Health
@@ -544,19 +525,19 @@ public class GameScreen implements Screen {
 
   /**
    * Creates a new bullet with origin at playerShip and with a certain direction
-   * @param spaceShip Spaceship to get origin of shot
+   * @param position Vector2 with origin of shot
    * @param direction Vector2 with direction of shot
    */
-  public void createNewBullet(SpaceShip spaceShip, Vector2 direction) {
+  public void createNewBullet(Vector2 position, Vector2 direction) {
     if (game.player.isHost()) {
-      Bullet bullet = new Bullet(world, direction, spaceShip.getPosition(), tracerBulletTexture, 30.0f * 2, 10,
+      Bullet bullet = new Bullet(world, direction, position, tracerBulletTexture, 30.0f * 2, 10,
         2.0f * 2,
         0.6f * 2);
       bullets.add(bullet);
       bulletCount++;
 
       Message<BulletDTO> newBulletMessage = new Message<>();
-      newBulletMessage.setMessage("newBullet", new BulletDTO(spaceShip.getPosition(), direction));
+      newBulletMessage.setMessage("newBullet", new BulletDTO(position, direction));
 
       game.server.sendToAllTCP(newBulletMessage);
     }

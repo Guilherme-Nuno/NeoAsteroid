@@ -1,11 +1,8 @@
 package com.guilherme.neoasteroid;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
-import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.math.Vector3;
-import com.esotericsoftware.minlog.Log;
+import com.guilherme.neoasteroid.spaceship.SpaceShip;
 
 public class InputHandlerHost implements InputProcessor {
   private final Main game;

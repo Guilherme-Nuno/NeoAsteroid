@@ -1,6 +1,7 @@
 package com.guilherme.neoasteroid;
 
 import com.badlogic.gdx.math.Vector2;
+import com.guilherme.neoasteroid.spaceship.SpaceShip;
 
 public class SpaceShipDTO {
   private Player player;

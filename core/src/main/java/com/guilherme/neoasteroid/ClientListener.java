@@ -7,6 +7,7 @@ import com.badlogic.gdx.utils.Array;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 import com.esotericsoftware.minlog.Log;
+import com.guilherme.neoasteroid.spaceship.SpaceShip;
 
 public class ClientListener extends Listener {
   private Main game;

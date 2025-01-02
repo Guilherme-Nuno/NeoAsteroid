@@ -2,6 +2,7 @@ package com.guilherme.neoasteroid;
 
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
+import com.guilherme.neoasteroid.spaceship.SpaceShip;
 
 public class InputHandlerClient implements InputProcessor {
   private final Main game;

@@ -1,4 +1,4 @@
-package com.guilherme.neoasteroid;
+package com.guilherme.neoasteroid.spaceship;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
@@ -13,6 +13,14 @@ import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
+import com.guilherme.neoasteroid.Constants;
+import com.guilherme.neoasteroid.GameScreen;
+import com.guilherme.neoasteroid.Player;
+import com.guilherme.neoasteroid.SpaceShipDTO;
+import com.guilherme.neoasteroid.weapons.LaserCannon;
+import com.guilherme.neoasteroid.weapons.Weapon;
+
+import java.util.ArrayList;
 
 public class SpaceShip {
   private final Player player;
@@ -22,8 +30,8 @@ public class SpaceShip {
   private final Texture spaceShipImg = new Texture("space_ship_medium.png");
   public Body body;
   private final Sprite sprite;
-  private final float spaceShipWidth = 2.0f * 2;
-  private final float spaceShipHeight = 2.6f * 2;
+  private final float spaceShipWidth = 2.0f * 4;
+  private final float spaceShipHeight = 2.6f * 4;
   private final float rateOfFire;
   private float rateOfFireTimer;
   private boolean isAccelerating = false;
@@ -39,6 +47,8 @@ public class SpaceShip {
   private float maxShield = 100;
   private float hull = 100;
   private boolean isAlive = true;
+  private ArrayList<HardPoint> hardpointList;
+  private int totalPrimaryHardpoint;
 
   public SpaceShip(World world, SpaceShipDTO spaceShipDTO) {
     this.player = spaceShipDTO.getPlayer();
@@ -74,6 +84,12 @@ public class SpaceShip {
 
     shape.dispose();
 
+    hardpointList = new ArrayList<>();
+    totalPrimaryHardpoint = 2;
+
+    hardpointList.add(new HardPoint(new LaserCannon(), new Vector2(2,0)));
+    hardpointList.add(new HardPoint(new LaserCannon(), new Vector2(-2,0)));
+
     body.setLinearVelocity(spaceShipDTO.getLinearVelocity());
   }
 
@@ -106,6 +122,13 @@ public class SpaceShip {
     Fixture fixture = body.createFixture(fixtureDef);
     fixture.setUserData(this);
 
+    hardpointList = new ArrayList<>();
+    hardpointList.add(new HardPoint(new LaserCannon(), new Vector2(2,0)));
+    hardpointList.add(new HardPoint(new LaserCannon(), new Vector2(-2,0)));
+    hardpointList.add(new HardPoint(new LaserCannon(), new Vector2(3,-2)));
+    hardpointList.add(new HardPoint(new LaserCannon(), new Vector2(-3,-2)));
+    totalPrimaryHardpoint = 2;
+
     shape.dispose();
   }
 
@@ -118,6 +141,37 @@ public class SpaceShip {
   }
 
   public void dispose() {
+  }
+
+  /**
+   * Simulates spaceship behaviour for the specified delta time
+   * @param delta time since last render iteration
+   */
+  public void simulate(GameScreen gameScreen, float delta) {
+    if (isFiring()) {
+      for (HardPoint hardPoint : hardpointList) {
+        Weapon weapon = hardPoint.getWeapon();
+        weapon.incrementRateOfFireTimer(delta);
+        if (weapon.getRateOfFireTimer() > weapon.getRateOfFire()) {
+          if (getEnergy() >= weapon.getEnergyPerShot()) {
+            Vector2 direction = new Vector2(getPlayer().getMousePosition()).sub(getPosition().add(hardPoint.getPositionOnShip())).nor();
+
+            gameScreen.createNewBullet(this.getPosition().add(hardPoint.getPositionOnShip()), direction);
+            weapon.setRateOfFireTimer(0);
+            setEnergy(getEnergy() - getShotEnergy());
+          }
+        }
+      }
+    }
+
+    float nextEnergy = getEnergy() + getEnergyRechargeRate() * delta;
+
+    setEnergy(Math.min(nextEnergy, getMaxEnergy()));
+
+    if (nextEnergy > getMaxEnergy()) {
+      float nextShield = getShield()+ getEnergyRechargeRate() / 2 * delta;
+      setShield(Math.min(nextShield, getMaxShield()));
+    }
   }
 
   public void accelerate() {
