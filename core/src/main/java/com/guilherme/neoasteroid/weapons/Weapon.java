@@ -1,34 +1,47 @@
 package com.guilherme.neoasteroid.weapons;
 
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Sprite;
 
 public class Weapon {
   private final int damage;
   private final float rateOfFire;
-  private boolean isFiring;
+  private boolean isRotating;
   private final Texture weaponTexture;
   private final Texture bulletTexture;
   private final float rateOfRotation;
   private float rateOfFireTimer;
   private final float energyPerShot;
+  private Sprite weaponSprite;
+  private float bulletSpread;
 
-  public Weapon (int damage, float rateOfFire, Texture weaponTexture, Texture bulletTexture, float rateOfRotation, float energyPerShot) {
+
+  public Weapon (
+    int damage,
+    float rateOfFire,
+    Texture weaponTexture,
+    Texture bulletTexture,
+    float rateOfRotation,
+    float energyPerShot,
+    float bulletSpread)
+  {
     this.damage = damage;
     this.rateOfFire = rateOfFire;
-    isFiring = false;
+    isRotating = false;
     this.weaponTexture = weaponTexture;
     this.rateOfRotation = rateOfRotation;
     this.bulletTexture = bulletTexture;
     this.energyPerShot = energyPerShot;
     rateOfFireTimer = (float) Math.random() * rateOfFire;
+    this.bulletSpread = bulletSpread;
   }
 
-  public void setFiring(boolean firing) {
-    isFiring = firing;
+  public void setRotating(boolean rotating) {
+    isRotating = rotating;
   }
 
-  public boolean isFiring() {
-    return isFiring;
+  public boolean isRotating() {
+    return isRotating;
   }
 
   public float getRateOfFire() {
@@ -65,5 +78,17 @@ public class Weapon {
 
   public float getEnergyPerShot() {
     return energyPerShot;
+  }
+
+  public void setWeaponSprite(Sprite weaponSprite) {
+    this.weaponSprite = weaponSprite;
+  }
+
+  public Sprite getWeaponSprite() {
+    return weaponSprite;
+  }
+
+  public float getBulletSpread() {
+    return bulletSpread;
   }
 }

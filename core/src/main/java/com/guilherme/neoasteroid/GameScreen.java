@@ -266,22 +266,20 @@ public class GameScreen implements Screen {
     game.spriteBatch.begin();
     // game.spriteBatch.draw(backgroundTexture, -1280 / 2, -640 / 2, 1280 * 2, 640 * 2);
 
-    for (
-
-    Planet planet : planets) {
+    for ( Planet planet : planets) {
       planet.render(game.spriteBatch);
     }
 
-    for (Satellite satellite : satellites.values()) {
+    for ( Satellite satellite : satellites.values()) {
       satellite.render(game.spriteBatch);
     }
 
-    for (Bullet bullet : bullets) {
-      bullet.render(game.spriteBatch);
+    for ( SpaceShip spaceShip : playersSpaceShips) {
+      spaceShip.render(game.spriteBatch);
     }
 
-    for (SpaceShip spaceShip : playersSpaceShips) {
-      spaceShip.render(game.spriteBatch);
+    for ( Bullet bullet : bullets) {
+      bullet.render(game.spriteBatch);
     }
 
     game.spriteBatch.end();

@@ -32,8 +32,6 @@ public class SpaceShip {
   private final Sprite sprite;
   private final float spaceShipWidth = 2.0f * 4;
   private final float spaceShipHeight = 2.6f * 4;
-  private final float rateOfFire;
-  private float rateOfFireTimer;
   private boolean isAccelerating = false;
   private boolean isTurningRight = false;
   private boolean isTurningLeft = false;
@@ -47,7 +45,7 @@ public class SpaceShip {
   private float maxShield = 100;
   private float hull = 100;
   private boolean isAlive = true;
-  private ArrayList<HardPoint> hardpointList;
+  private final ArrayList<HardPoint> hardpointList;
   private int totalPrimaryHardpoint;
 
   public SpaceShip(World world, SpaceShipDTO spaceShipDTO) {
@@ -55,8 +53,6 @@ public class SpaceShip {
     this.position = spaceShipDTO.getPosition();
 
     acceleration = 33.3f;
-    rateOfFire = 0.25f;
-    rateOfFireTimer = rateOfFire;
 
     sprite = new Sprite(spaceShipImg);
     sprite.setSize(spaceShipWidth, spaceShipHeight);
@@ -98,8 +94,6 @@ public class SpaceShip {
 
     position = new Vector2(setCoordinates(80, 120));
     acceleration = 33.3f;
-    rateOfFire = 0.25f;
-    rateOfFireTimer = rateOfFire;
 
     sprite = new Sprite(spaceShipImg);
     sprite.setSize(spaceShipWidth, spaceShipHeight);
@@ -138,6 +132,27 @@ public class SpaceShip {
     sprite.setRotation(MathUtils.radiansToDegrees * -body.getAngle());
     sprite.setPosition(position.x - sprite.getWidth() / 2, position.y - sprite.getHeight() / 2);
     sprite.draw(spriteBatch);
+
+    Player player = getPlayer();
+
+    for (HardPoint hardPoint : hardpointList) {
+      hardPoint.getWeapon().getWeaponSprite().setOrigin(
+        hardPoint.getWeapon().getWeaponSprite().getWidth() / 2,
+        hardPoint.getWeapon().getWeaponSprite().getHeight() / 2);
+
+      Vector2 direction = new Vector2(getPlayer().getMousePosition())
+        .sub(getPosition().add(hardPoint.getPositionOnShip()))
+        .nor();
+
+      hardPoint.getWeapon().getWeaponSprite().setPosition(
+        body.getPosition().x + hardPoint.getPositionOnShip().x - hardPoint.getWeapon().getWeaponSprite().getOriginX(),
+        body.getPosition().y + hardPoint.getPositionOnShip().y - hardPoint.getWeapon().getWeaponSprite().getOriginY());
+
+      hardPoint.getWeapon().getWeaponSprite().setRotation(direction.angleDeg() - 90);
+
+      hardPoint.getWeapon().getWeaponSprite().draw(spriteBatch);
+    }
+
   }
 
   public void dispose() {
@@ -155,10 +170,11 @@ public class SpaceShip {
         if (weapon.getRateOfFireTimer() > weapon.getRateOfFire()) {
           if (getEnergy() >= weapon.getEnergyPerShot()) {
             Vector2 direction = new Vector2(getPlayer().getMousePosition()).sub(getPosition().add(hardPoint.getPositionOnShip())).nor();
+            float bulletSpread = (float) Math.random() * 2 * weapon.getBulletSpread() - weapon.getBulletSpread();
 
-            gameScreen.createNewBullet(this.getPosition().add(hardPoint.getPositionOnShip()), direction);
+            gameScreen.createNewBullet(this.getPosition().add(hardPoint.getPositionOnShip()), direction.rotateDeg(bulletSpread));
             weapon.setRateOfFireTimer(0);
-            setEnergy(getEnergy() - getShotEnergy());
+            setEnergy(getEnergy() - hardPoint.getWeapon().getEnergyPerShot());
           }
         }
       }
@@ -241,18 +257,6 @@ public class SpaceShip {
     float y = distance * (float) Math.sin(angle);
 
     return new Vector2(x, y);
-  }
-
-  public float getRateOfFireTimer() {
-    return rateOfFireTimer;
-  }
-
-  public void setRateOfFireTimer(float rateOfFireTimer) {
-    this.rateOfFireTimer = rateOfFireTimer;
-  }
-
-  public float getRateOfFire() {
-    return rateOfFire;
   }
 
   public void setEnergyTimer(float energyTimer) {

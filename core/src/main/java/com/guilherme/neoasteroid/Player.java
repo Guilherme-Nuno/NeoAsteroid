@@ -10,6 +10,9 @@ public class Player {
   private boolean inGameScreen;
   private boolean spaceShipsLoaded;
   private boolean asteroidsLoaded;
+  /**
+   * Vector2 with position of mouse on world coordinates
+   */
   private Vector2 mousePosition;
 
   public Player() {
