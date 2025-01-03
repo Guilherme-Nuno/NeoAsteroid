@@ -10,7 +10,7 @@ public class LaserCannon extends Weapon {
       0.25f,
       new Texture("laserTurret.png"),
       new Texture("laser.png"),
-      4f,
+      40f,
       0.85f,
       2.0f);
 

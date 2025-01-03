@@ -13,6 +13,7 @@ import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
+import com.esotericsoftware.minlog.Log;
 import com.guilherme.neoasteroid.Constants;
 import com.guilherme.neoasteroid.GameScreen;
 import com.guilherme.neoasteroid.Player;
@@ -140,15 +141,11 @@ public class SpaceShip {
         hardPoint.getWeapon().getWeaponSprite().getWidth() / 2,
         hardPoint.getWeapon().getWeaponSprite().getHeight() / 2);
 
-      Vector2 direction = new Vector2(getPlayer().getMousePosition())
-        .sub(getPosition().add(hardPoint.getPositionOnShip()))
-        .nor();
-
       hardPoint.getWeapon().getWeaponSprite().setPosition(
         body.getPosition().x + hardPoint.getPositionOnShip().x - hardPoint.getWeapon().getWeaponSprite().getOriginX(),
         body.getPosition().y + hardPoint.getPositionOnShip().y - hardPoint.getWeapon().getWeaponSprite().getOriginY());
 
-      hardPoint.getWeapon().getWeaponSprite().setRotation(direction.angleDeg() - 90);
+      hardPoint.getWeapon().getWeaponSprite().setRotation(hardPoint.getWeapon().getRotationDeg() - 90);
 
       hardPoint.getWeapon().getWeaponSprite().draw(spriteBatch);
     }
@@ -163,22 +160,37 @@ public class SpaceShip {
    * @param delta time since last render iteration
    */
   public void simulate(GameScreen gameScreen, float delta) {
-    if (isFiring()) {
-      for (HardPoint hardPoint : hardpointList) {
-        Weapon weapon = hardPoint.getWeapon();
-        weapon.incrementRateOfFireTimer(delta);
-        if (weapon.getRateOfFireTimer() > weapon.getRateOfFire()) {
-          if (getEnergy() >= weapon.getEnergyPerShot()) {
-            Vector2 direction = new Vector2(getPlayer().getMousePosition()).sub(getPosition().add(hardPoint.getPositionOnShip())).nor();
-            float bulletSpread = (float) Math.random() * 2 * weapon.getBulletSpread() - weapon.getBulletSpread();
+    for (HardPoint hardPoint : hardpointList) {
+      Vector2 direction = new Vector2(getPlayer().getMousePosition()).sub(getPosition().add(hardPoint.getPositionOnShip())).nor();
+      Weapon weapon = hardPoint.getWeapon();
 
-            gameScreen.createNewBullet(this.getPosition().add(hardPoint.getPositionOnShip()), direction.rotateDeg(bulletSpread));
-            weapon.setRateOfFireTimer(0);
-            setEnergy(getEnergy() - hardPoint.getWeapon().getEnergyPerShot());
-          }
+      // TODO 360 degrees turn go around. Need to find a way to make them to turn the right way.
+      if(weapon.getRotationDeg() != direction.angleDeg()) {
+        if (weapon.getRotationDeg() < direction.angleDeg()) {
+          weapon.setRotationDeg(Math.min( weapon.getRotationDeg() + weapon.getRateOfRotation() * delta, direction.angleDeg()));
+        } else {
+          weapon.setRotationDeg(Math.max(weapon.getRotationDeg() - weapon.getRateOfRotation() * delta, direction.angleDeg()));
         }
       }
-    }
+
+      if (isFiring()) {
+          weapon.incrementRateOfFireTimer(delta);
+          if (weapon.getRateOfFireTimer() > weapon.getRateOfFire()) {
+            if (getEnergy() >= weapon.getEnergyPerShot()) {
+
+
+              float bulletSpread = (float) Math.random() * 2 * weapon.getBulletSpread() - weapon.getBulletSpread();
+
+              gameScreen.createNewBullet(
+                this.getPosition().add(hardPoint.getPositionOnShip()),
+                new Vector2(1, 0).setAngleDeg(weapon.getRotationDeg() + bulletSpread));
+              weapon.setRateOfFireTimer(0);
+              setEnergy(getEnergy() - hardPoint.getWeapon().getEnergyPerShot());
+            }
+          }
+        }
+
+      }
 
     float nextEnergy = getEnergy() + getEnergyRechargeRate() * delta;
 

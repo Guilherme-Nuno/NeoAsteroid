@@ -7,13 +7,14 @@ public class Weapon {
   private final int damage;
   private final float rateOfFire;
   private boolean isRotating;
+  private float rotationDeg;
   private final Texture weaponTexture;
   private final Texture bulletTexture;
   private final float rateOfRotation;
   private float rateOfFireTimer;
   private final float energyPerShot;
   private Sprite weaponSprite;
-  private float bulletSpread;
+  private final float bulletSpread;
 
 
   public Weapon (
@@ -34,6 +35,7 @@ public class Weapon {
     this.energyPerShot = energyPerShot;
     rateOfFireTimer = (float) Math.random() * rateOfFire;
     this.bulletSpread = bulletSpread;
+    this.rotationDeg = 0;
   }
 
   public void setRotating(boolean rotating) {
@@ -42,6 +44,14 @@ public class Weapon {
 
   public boolean isRotating() {
     return isRotating;
+  }
+
+  public float getRotationDeg() {
+    return rotationDeg;
+  }
+
+  public void setRotationDeg(float rotationDeg) {
+    this.rotationDeg = rotationDeg;
   }
 
   public float getRateOfFire() {
