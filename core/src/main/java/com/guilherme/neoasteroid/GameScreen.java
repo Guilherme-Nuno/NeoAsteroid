@@ -70,11 +70,13 @@ public class GameScreen implements Screen {
     earthHP = earthPlanet.getHealthPoints();
     planets.add(earthPlanet);
 
-    // Moon creation (experimental)
-    // Texture moonImage = new Texture("moon.png");
-    // Planet moonPlanet = new Planet(world, new Vector2(500, 0), 1.5f, 160, 1.625f,
-    // moonImage);
-    // planets.add(moonPlanet);
+
+    /* Moon creation (experimental)
+    Texture moonImage = new Texture("moon.png");
+    Planet moonPlanet = new Planet(world, new Vector2(500, 0), 1.5f, 160, 1.625f,
+    moonImage);
+    planets.add(moonPlanet);
+    */
 
     satellites = new ConcurrentHashMap<>();
     playersLoadingCompleteTempList = new CopyOnWriteArrayList<>();
@@ -165,20 +167,16 @@ public class GameScreen implements Screen {
     spaceShipsMovements();
 
     // Update mouse position
-    if (!game.player.isHost()) {
-      Vector3 mouseScreenPosition = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0);
-      Vector3 mouseWorldPosition = camera.unproject(mouseScreenPosition);
+    Vector3 mouseScreenPosition = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0);
+    Vector3 mouseWorldPosition = camera.unproject(mouseScreenPosition);
 
+    if (!game.player.isHost()) {
       Vector2 mouseCoordinates = new Vector2(mouseWorldPosition.x, mouseWorldPosition.y);
       MousePositionDTO mousePositionDTO = new MousePositionDTO(game.player.getName(), mouseCoordinates);
       Message<MousePositionDTO> mousePositionDTOMessage = new Message<>();
       mousePositionDTOMessage.setMessage("mousePosition",mousePositionDTO);
       game.client.sendTCP(mousePositionDTOMessage);
     } else {
-      Vector3 mouseScreenPosition = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0);
-      Vector3 mouseWorldPosition = camera.unproject(mouseScreenPosition);
-
-
       game.player.setMousePosition(new Vector2(mouseWorldPosition.x, mouseWorldPosition.y));
     }
 
@@ -189,7 +187,7 @@ public class GameScreen implements Screen {
       timeToAsteroid += delta;
 
       if (timeToAsteroid > 5f) {
-        createAsteroidThreat(world, satelliteTexture, planets.get(0), satellites);
+        createAsteroidThreat( satelliteTexture, planets.get(0));
         timeToAsteroid = 0.0f;
       }
 
@@ -316,31 +314,31 @@ public class GameScreen implements Screen {
     world.dispose();
   }
 
+  /**
+   * Apply a attraction force to a Body to the specific Planet to simulate gravity
+   * @param satelliteBody Body to get attracted
+   * @param planet Target Planet
+   */
   private void applyGravitationalForce(Body satelliteBody, Planet planet) {
-    // Distância entre os corpos
+
     Vector2 direction = planet.getPosition().cpy().sub(satelliteBody.getPosition());
     float distance = planet.getPosition().dst(satelliteBody.getPosition());
 
-    // Evitar divisão por zero
-    // if (distance > 200f)
-    // return;
-
-    // Normaliza a direção (vetor unitário)
     direction.nor();
 
-    // Calcula a força gravitacional (simplificada)
     float forceMagnitude = Constants.EARTH_GRAVITY * (planet.getMass() * satelliteBody.getMass())
         / (distance * distance);
     Vector2 force = direction.scl(forceMagnitude);
 
-    // Gdx.app.log("Gravidade",
-    // "x: " + direction.x + "y: " + direction.y + " Mag: " + forceMagnitude + "
-    // Pos: "
-    // + planet.getPosition());
-
     satelliteBody.applyForceToCenter(force, true);
   }
 
+  /**
+   * Sets initial velocity and direction to get a stable orbit around a specific Planet
+   * @param satelliteBody Body to set velocity and direction
+   * @param planet Target Planet
+   * @param rotationDirection Direction of rotation ( 1 for counter-clockwise, -1 for opposite )
+   */
   private void setInitialOrbitVelocity(Body satelliteBody, Planet planet, float rotationDirection) {
     float satelliteDistance = planet.getPosition().dst(satelliteBody.getPosition());
     float setInitialVelocityMagnitude = rotationDirection * (float) Math
@@ -351,28 +349,32 @@ public class GameScreen implements Screen {
     Vector2 perpendicularDirection = new Vector2(-direction.y, direction.x);
 
     satelliteBody.setLinearVelocity(perpendicularDirection.scl(setInitialVelocityMagnitude));
-
-    // Gdx.app.log("Function", "Dist: " + satelliteDistance + " V: " +
-    // setInitialVelocityMagnitude);
   }
 
 
-
-  private void createAsteroidThreat(World world, Texture satelliteTexture, Planet planet,
-      Map<Integer, Satellite> satelliteList) {
-    Satellite asteroid = new Satellite(world, satelliteID, 1000, 1500, 4, satelliteTexture);
+  /**
+   * Creates a new asteroid aimed at a specific Planet.
+   * @param satelliteTexture Texture for asteroid
+   * @param planet Target Planet
+   */
+  private void createAsteroidThreat( Texture satelliteTexture, Planet planet) {
+    Satellite asteroid = new Satellite(this.world, satelliteID, 1000, 1500, 4, satelliteTexture);
     satelliteID++;
     Vector2 direction = planet.getPosition().cpy().sub(asteroid.body.getPosition());
     Vector2 force = direction.scl(5);
 
     asteroid.body.setLinearVelocity(force);
 
-    satelliteList.put(asteroid.getId(), asteroid);
+    this.satellites.put(asteroid.getId(), asteroid);
     hostServer.sendNewAsteroid(asteroid);
   }
 
+  /**
+   * Simulates atmospheric drag from the planet in the center.
+   * @param satellite Satellite affected.
+   */
   private void simulateAtmosphericDrag(Satellite satellite) {
-    float dragCoeficient = 0.53f;
+    float dragCoefficient = 0.53f;
     float area = (float) Math.pow(satellite.getRadius(), 2) * 0.005f * (float) Math.PI;
     float airDensitySeaLevel = 1.255f;
     float maxAltitude = 90f;
@@ -384,15 +386,17 @@ public class GameScreen implements Screen {
 
     float airDensity = airDensitySeaLevel * (float) Math.exp(-height / maxAltitude);
 
-    float dragForce = 0.5f * dragCoeficient * airDensity * area * velocity * velocity;
+    float dragForce = 0.5f * dragCoefficient * airDensity * area * velocity * velocity;
 
     satellite.body.applyForceToCenter(direction.nor().scl(-dragForce), false);
-
-    // Gdx.app.log("Drag", "Magnitude :" + dragForce);
   }
 
+  /**
+   * Simulates atmospheric drag from the planet in the center.
+   * @param ship SpaceShip that gets affected
+   */
   private void simulateAtmosphericDrag(SpaceShip ship) {
-    float dragCoeficient = 0.53f;
+    float dragCoefficient = 0.53f;
     float area = (float) Math.pow(5f, 2) * 0.005f * (float) Math.PI;
     float airDensitySeaLevel = 1.255f;
     float maxAltitude = 90f;
@@ -404,14 +408,16 @@ public class GameScreen implements Screen {
 
     float airDensity = airDensitySeaLevel * (float) Math.exp(-height / maxAltitude);
 
-    float dragForce = 0.5f * dragCoeficient * airDensity * area * velocity * velocity;
+    float dragForce = 0.5f * dragCoefficient * airDensity * area * velocity * velocity;
 
     ship.body.applyForceToCenter(direction.nor().scl(-dragForce), false);
-
-    // Gdx.app.log("Drag", "Velocity: " + velocity + " Magnitude: " + dragForce + "
-    // Height: " + height);
   }
 
+  /**
+   * Finds the planet that exerts the biggest gravitational force over the satellite.
+   * @param satelliteBody Body that orbits the planet
+   * @return Planet
+   */
   private Planet findPlanetHighestGravForce(Body satelliteBody) {
     float force;
     float highestForce = 0;
@@ -434,6 +440,10 @@ public class GameScreen implements Screen {
 
   }
 
+  /**
+   * Adds the player to the players loading complete list. Used to start the game.
+   * @param player Player object
+   */
   public void setPlayerLoadingComplete(Player player) {
     playersLoadingCompleteTempList.add(player.getName());
   }
@@ -493,6 +503,9 @@ public class GameScreen implements Screen {
     }
   }
 
+  /**
+   * Controls spaceships movements (rotation and acceleration) on the game world
+   */
   private void spaceShipsMovements() {
     for (SpaceShip spaceShip : playersSpaceShips) {
       if (spaceShip.isAccelerating()) {
@@ -509,6 +522,9 @@ public class GameScreen implements Screen {
     }
   }
 
+  /**
+   * Sets camera position to be between the player ship and the mouse.
+   */
   private void setCameraPosition() {
     Vector3 mouseScreenPosition = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0);
     Vector3 mouseWorldPosition = camera.unproject(mouseScreenPosition);

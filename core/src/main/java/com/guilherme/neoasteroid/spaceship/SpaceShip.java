@@ -65,9 +65,6 @@ public class SpaceShip {
     body = world.createBody(bodyDef);
     body.setAngularDamping(25.0f);
 
-    // CircleShape shape = new CircleShape();
-    // shape.setRadius(spaceShipRadius);
-
     PolygonShape shape = new PolygonShape();
     shape.setAsBox(this.spaceShipWidth / 2, this.spaceShipHeight / 2);
 
