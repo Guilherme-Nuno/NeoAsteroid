@@ -1,4 +1,4 @@
-package com.guilherme.neoasteroid;
+package com.guilherme.neoasteroid.game;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +17,15 @@ import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.esotericsoftware.minlog.Log;
+import com.guilherme.neoasteroid.*;
+import com.guilherme.neoasteroid.game.contact.WorldContactListener;
+import com.guilherme.neoasteroid.game.hud.GameHUD;
+import com.guilherme.neoasteroid.game.input.InputHandlerClient;
+import com.guilherme.neoasteroid.game.input.InputHandlerHost;
+import com.guilherme.neoasteroid.network.BulletDTO;
+import com.guilherme.neoasteroid.network.HostServer;
+import com.guilherme.neoasteroid.network.Message;
+import com.guilherme.neoasteroid.network.MousePositionDTO;
 import com.guilherme.neoasteroid.spaceship.SpaceShip;
 
 public class GameScreen implements Screen {

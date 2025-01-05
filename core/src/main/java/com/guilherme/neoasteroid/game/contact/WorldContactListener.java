@@ -1,4 +1,4 @@
-package com.guilherme.neoasteroid;
+package com.guilherme.neoasteroid.game.contact;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.physics.box2d.Contact;
@@ -6,6 +6,9 @@ import com.badlogic.gdx.physics.box2d.ContactImpulse;
 import com.badlogic.gdx.physics.box2d.ContactListener;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.Manifold;
+import com.guilherme.neoasteroid.game.Bullet;
+import com.guilherme.neoasteroid.game.Planet;
+import com.guilherme.neoasteroid.game.Satellite;
 
 public class WorldContactListener implements ContactListener {
 

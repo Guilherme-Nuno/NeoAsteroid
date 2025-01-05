@@ -1,4 +1,4 @@
-package com.guilherme.neoasteroid;
+package com.guilherme.neoasteroid.game;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -10,6 +10,8 @@ import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.World;
+import com.guilherme.neoasteroid.Constants;
+import com.guilherme.neoasteroid.network.SatelliteDTO;
 
 public class Satellite {
   private int id;

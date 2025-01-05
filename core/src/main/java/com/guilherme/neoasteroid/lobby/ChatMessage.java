@@ -1,4 +1,6 @@
-package com.guilherme.neoasteroid;
+package com.guilherme.neoasteroid.lobby;
+
+import com.guilherme.neoasteroid.Main;
 
 public class ChatMessage {
   public String playerName;

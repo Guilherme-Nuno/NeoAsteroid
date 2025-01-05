@@ -1,4 +1,4 @@
-package com.guilherme.neoasteroid;
+package com.guilherme.neoasteroid.network;
 
 import com.badlogic.gdx.math.Vector2;
 

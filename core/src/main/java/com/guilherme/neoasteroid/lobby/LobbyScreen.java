@@ -1,4 +1,4 @@
-package com.guilherme.neoasteroid;
+package com.guilherme.neoasteroid.lobby;
 
 import java.io.IOException;
 
@@ -13,6 +13,11 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.guilherme.neoasteroid.*;
+import com.guilherme.neoasteroid.game.GameScreen;
+import com.guilherme.neoasteroid.network.ClientListener;
+import com.guilherme.neoasteroid.network.Message;
+import com.guilherme.neoasteroid.network.ServerListener;
 
 public class LobbyScreen implements Screen {
   private final Main game;

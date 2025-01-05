@@ -13,11 +13,10 @@ import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
-import com.esotericsoftware.minlog.Log;
 import com.guilherme.neoasteroid.Constants;
-import com.guilherme.neoasteroid.GameScreen;
+import com.guilherme.neoasteroid.game.GameScreen;
 import com.guilherme.neoasteroid.Player;
-import com.guilherme.neoasteroid.SpaceShipDTO;
+import com.guilherme.neoasteroid.network.SpaceShipDTO;
 import com.guilherme.neoasteroid.weapons.LaserCannon;
 import com.guilherme.neoasteroid.weapons.Weapon;
 

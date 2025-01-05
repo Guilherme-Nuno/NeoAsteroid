@@ -1,35 +1,36 @@
-package com.guilherme.neoasteroid;
+package com.guilherme.neoasteroid.game.input;
 
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
+import com.guilherme.neoasteroid.Main;
+import com.guilherme.neoasteroid.network.Message;
+import com.guilherme.neoasteroid.network.SpaceShipDTO;
 import com.guilherme.neoasteroid.spaceship.SpaceShip;
 
-public class InputHandlerHost implements InputProcessor {
+public class InputHandlerClient implements InputProcessor {
   private final Main game;
-  private final GameScreen gameScreen;
   private final SpaceShip playerShip;
-  private Message<SpaceShipDTO> spaceShipDTOMessage = new Message<>();
+  private final Message<SpaceShipDTO> spaceShipDTOMessage = new Message<>();
 
-  public InputHandlerHost(Main game, GameScreen gameScreen, SpaceShip playerShip) {
+  public InputHandlerClient(Main game, SpaceShip playerShip) {
     this.game = game;
     this.playerShip = playerShip;
-    this.gameScreen = gameScreen;
   }
 
   @Override
   public boolean keyDown(int keycode) {
     switch (keycode) {
       case Input.Keys.UP:
-        playerShip.setAccelerating(true);
+        spaceShipDTOMessage.setMessage("inputStartUp", new SpaceShipDTO(playerShip));
+        game.client.sendTCP(spaceShipDTOMessage);
         return true;
       case Input.Keys.LEFT:
-        playerShip.setTurningLeft(true);
+        spaceShipDTOMessage.setMessage("inputStartLeft", new SpaceShipDTO(playerShip));
+        game.client.sendTCP(spaceShipDTOMessage);
         return true;
       case Input.Keys.RIGHT:
-        playerShip.setTurningRight(true);
-        return  true;
-      case Input.Buttons.LEFT:
-
+        spaceShipDTOMessage.setMessage("inputStartRight", new SpaceShipDTO(playerShip));
+        game.client.sendTCP(spaceShipDTOMessage);
         return  true;
     }
     return false;
@@ -39,13 +40,16 @@ public class InputHandlerHost implements InputProcessor {
   public boolean keyUp(int keycode) {
     switch (keycode) {
       case Input.Keys.UP:
-        playerShip.setAccelerating(false);
+        spaceShipDTOMessage.setMessage("inputEndUp", new SpaceShipDTO(playerShip));
+        game.client.sendTCP(spaceShipDTOMessage);
         return true;
       case Input.Keys.LEFT:
-        playerShip.setTurningLeft(false);
+        spaceShipDTOMessage.setMessage("inputEndLeft", new SpaceShipDTO(playerShip));
+        game.client.sendTCP(spaceShipDTOMessage);
         return true;
       case Input.Keys.RIGHT:
-        playerShip.setTurningRight(false);
+        spaceShipDTOMessage.setMessage("inputEndRight", new SpaceShipDTO(playerShip));
+        game.client.sendTCP(spaceShipDTOMessage);
         return  true;
     }
     return false;
@@ -59,7 +63,8 @@ public class InputHandlerHost implements InputProcessor {
   @Override
   public boolean touchDown(int screenX, int screenY, int pointer, int button) {
     if (button == Input.Buttons.LEFT) {
-      playerShip.setFiring(true);
+      spaceShipDTOMessage.setMessage("inputStartMouseLeft", new SpaceShipDTO(playerShip));
+      game.client.sendTCP(spaceShipDTOMessage);
       return true;
     }
     return false;
@@ -68,7 +73,8 @@ public class InputHandlerHost implements InputProcessor {
   @Override
   public boolean touchUp(int screenX, int screenY, int pointer, int button) {
     if (button == Input.Buttons.LEFT) {
-      playerShip.setFiring(false);
+      spaceShipDTOMessage.setMessage("inputEndMouseLeft", new SpaceShipDTO(playerShip));
+      game.client.sendTCP(spaceShipDTOMessage);
       return true;
     }
     return false;

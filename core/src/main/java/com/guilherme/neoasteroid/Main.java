@@ -15,6 +15,9 @@ import com.esotericsoftware.kryonet.Client;
 import com.esotericsoftware.kryonet.EndPoint;
 import com.esotericsoftware.kryonet.Server;
 import com.esotericsoftware.minlog.Log;
+import com.guilherme.neoasteroid.game.Satellite;
+import com.guilherme.neoasteroid.lobby.ChatMessage;
+import com.guilherme.neoasteroid.network.*;
 
 /**
  * {@link com.badlogic.gdx.ApplicationListener} implementation shared by all

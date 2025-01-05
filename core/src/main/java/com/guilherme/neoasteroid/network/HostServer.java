@@ -1,8 +1,11 @@
-package com.guilherme.neoasteroid;
+package com.guilherme.neoasteroid.network;
 
 import java.util.ArrayList;
 
 import com.esotericsoftware.minlog.Log;
+import com.guilherme.neoasteroid.*;
+import com.guilherme.neoasteroid.game.GameScreen;
+import com.guilherme.neoasteroid.game.Satellite;
 import com.guilherme.neoasteroid.spaceship.SpaceShip;
 
 public class HostServer {

@@ -1,4 +1,4 @@
-package com.guilherme.neoasteroid;
+package com.guilherme.neoasteroid.network;
 
 import java.util.ArrayList;
 
@@ -6,6 +6,11 @@ import com.badlogic.gdx.utils.Array;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 import com.esotericsoftware.minlog.Log;
+import com.guilherme.neoasteroid.game.GameScreen;
+import com.guilherme.neoasteroid.Main;
+import com.guilherme.neoasteroid.Player;
+import com.guilherme.neoasteroid.lobby.ChatMessage;
+import com.guilherme.neoasteroid.lobby.LobbyScreen;
 import com.guilherme.neoasteroid.spaceship.SpaceShip;
 
 public class ServerListener extends Listener {
