@@ -1,5 +1,6 @@
 package com.guilherme.neoasteroid;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -55,6 +56,9 @@ public class Main extends Game {
   public void dispose() {
     spriteBatch.dispose();
     getScreen().dispose();
+    try {
+      server.dispose();
+    } catch (IOException ignored) {}
   }
 
   @Override

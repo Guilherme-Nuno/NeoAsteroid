@@ -161,12 +161,17 @@ public class SpaceShip {
       Vector2 direction = new Vector2(getPlayer().getMousePosition()).sub(getPosition().add(hardPoint.getPositionOnShip())).nor();
       Weapon weapon = hardPoint.getWeapon();
 
-      // TODO 360 degrees turn go around. Need to find a way to make them to turn the right way.
-      if(weapon.getRotationDeg() != direction.angleDeg()) {
-        if (weapon.getRotationDeg() < direction.angleDeg()) {
-          weapon.setRotationDeg(Math.min( weapon.getRotationDeg() + weapon.getRateOfRotation() * delta, direction.angleDeg()));
+      float deltaAngle = weapon.getRotationDeg() - direction.angleDeg() % 360;
+
+      if (deltaAngle > 180) deltaAngle -= 360;
+      if (deltaAngle < -180) deltaAngle += 360;
+
+      if (Math.abs(deltaAngle) > 0.01f) {
+        float rotationStep = weapon.getRateOfRotation() * delta;
+        if (Math.abs(deltaAngle) < rotationStep) {
+          weapon.setRotationDeg(direction.angleDeg());
         } else {
-          weapon.setRotationDeg(Math.max(weapon.getRotationDeg() - weapon.getRateOfRotation() * delta, direction.angleDeg()));
+          weapon.setRotationDeg(weapon.getRotationDeg() - Math.signum(deltaAngle) * rotationStep);
         }
       }
 
