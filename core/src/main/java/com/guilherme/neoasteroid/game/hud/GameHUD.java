@@ -17,7 +17,7 @@ public class GameHUD {
   private ProgressBar shieldBar;
   private ProgressBar earthHealthBar;
 
-  public GameHUD (GameScreen gameScreen, Skin gameSkin, Viewport viewport) {
+  public GameHUD (GameScreen gameScreen, Skin gameSkin) {
     hudStage = new Stage(new FitViewport(gameScreen.camera.viewportWidth, gameScreen.camera.viewportHeight));
     skin = gameSkin;
     this.gameScreen = gameScreen;

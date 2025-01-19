@@ -7,6 +7,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.*;
@@ -21,6 +22,7 @@ import com.guilherme.neoasteroid.*;
 import com.guilherme.neoasteroid.game.contact.WorldContactListener;
 import com.guilherme.neoasteroid.game.hud.GameHUD;
 import com.guilherme.neoasteroid.game.input.InputHandlerClient;
+import com.guilherme.neoasteroid.game.input.InputHandlerCommon;
 import com.guilherme.neoasteroid.game.input.InputHandlerHost;
 import com.guilherme.neoasteroid.network.BulletDTO;
 import com.guilherme.neoasteroid.network.HostServer;
@@ -51,8 +53,9 @@ public class GameScreen implements Screen {
   public List<SpaceShip> playersSpaceShips;
   public boolean allPlayersLoadingComplete = false;
   private final List<String> playersLoadingCompleteTempList;
-  private InputProcessor inputHandler;
+  private final InputMultiplexer inputMultiplexer;
   private GameHUD gameHUD;
+  public PauseMenu pauseMenu;
 
   public GameScreen(Main game) {
     this.game = game;
@@ -103,6 +106,8 @@ public class GameScreen implements Screen {
     Gdx.graphics.setCursor(inGameCrosshair);
 
     cursorPixmap.dispose();
+
+    inputMultiplexer = new InputMultiplexer();
 
     Log.info("Entering render...");
   }
@@ -157,20 +162,28 @@ public class GameScreen implements Screen {
 
     // Create game HUD
     if (gameHUD == null) {
-      gameHUD = new GameHUD(this, game.uiSkin, viewport);
+      gameHUD = new GameHUD(this, game.uiSkin);
+    }
+
+    if (pauseMenu == null) {
+      pauseMenu = new PauseMenu(game, this);
     }
 
     // Create inputHandlers based on host or client
-    if (inputHandler == null) {
+    if (inputMultiplexer.size() == 0) {
       if (game.player.isHost()) {
-        inputHandler = new InputHandlerHost(game, this, playerShip);
-        Gdx.input.setInputProcessor(inputHandler);
+        InputProcessor inputHandler = new InputHandlerHost(game, this, playerShip);
+        inputMultiplexer.addProcessor(inputHandler);
         Log.info("Created Host InputHandler");
       } else {
-        inputHandler = new InputHandlerClient(game, playerShip);
-        Gdx.input.setInputProcessor(inputHandler);
+        InputProcessor inputHandler = new InputHandlerClient(game, playerShip);
+        inputMultiplexer.addProcessor(inputHandler);
         Log.info("Created Client InputHandler");
       }
+      InputProcessor inputHandlerCommon = new InputHandlerCommon(this);
+      inputMultiplexer.addProcessor(inputHandlerCommon);
+
+      Gdx.input.setInputProcessor(inputMultiplexer);
     }
 
     spaceShipsMovements();
@@ -294,6 +307,10 @@ public class GameScreen implements Screen {
     gameHUD.updateBars();
     gameHUD.render(delta);
 
+    if (pauseMenu.isPaused()) {
+      pauseMenu.render();
+    }
+
     // Centers camera on mouse
     setCameraPosition();
 
@@ -324,7 +341,7 @@ public class GameScreen implements Screen {
   }
 
   /**
-   * Apply a attraction force to a Body to the specific Planet to simulate gravity
+   * Apply an attraction force to a Body to the specific Planet to simulate gravity
    * @param satelliteBody Body to get attracted
    * @param planet Target Planet
    */

@@ -53,7 +53,7 @@ public class LobbyScreen implements Screen {
       this.game.client.sendTCP(playerMessage);
     }
 
-    // Tabela para organizar elementos na tela
+    // Tabela para organizar elementos no ecrã
     Table table = new Table();
     table.setFillParent(true);
     stage.addActor(table);
@@ -98,15 +98,13 @@ public class LobbyScreen implements Screen {
 
     ScrollPane scrollPane = new ScrollPane(this.game.playerList, this.game.uiSkin);
 
-    // Botão para sair do lobby
     TextButton exitButton = new TextButton("Exit Lobby", this.game.uiSkin);
     exitButton.addListener(new ClickListener() {
 
       @Override
       public void clicked(InputEvent event, float x, float y) {
-        // Adicione a lógica para sair do lobby
+
         Gdx.app.log("Lobby", "Saindo do lobby...");
-        // Mudar para a tela principal ou a tela anterior
         if (game.player.isHost()) {
           game.server.stop();
         } else {
